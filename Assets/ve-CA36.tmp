@@ -1,0 +1,48 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class EdgeScript : MonoBehaviour {
+
+	public Transform Node1;
+	public Transform Node2;
+
+    private Color m_Color1;
+    private Color m_Color2;
+
+	private LineRenderer m_lineRenderer;
+
+	void Start () 
+	{
+		m_lineRenderer = GetComponent<LineRenderer> ();
+		if (m_lineRenderer && Node1 && Node2) {
+			m_lineRenderer.SetPosition (0, Node1.position);
+			m_lineRenderer.SetPosition (1, Node2.position);
+		}
+        m_Color1 = Color.white;
+        m_Color2 = Color.white;
+	}
+	
+	void Update () 
+    {
+		if(Node1 == null || Node2 == null)
+		{
+			Destroy(gameObject);
+			return;
+		}
+
+        m_Color1 = Color.white;
+        m_Color2 = Color.white;        
+        
+        if (Node1.GetComponent<NodeBase>().m_hightLight) m_Color1 = Color.cyan;
+        if (Node2.GetComponent<NodeBase>().m_hightLight) m_Color2 = Color.cyan;
+
+        if (Node1.GetComponent<NodeBase>().m_bSimulationUnlock) m_Color1 = Color.yellow;
+        if (Node2.GetComponent<NodeBase>().m_bSimulationUnlock) m_Color2 = Color.yellow;
+
+        if (Node1.GetComponent<NodeBase>().bUnlocked) m_Color1 = Color.blue;
+        if (Node2.GetComponent<NodeBase>().bUnlocked) m_Color2 = Color.blue;
+
+        m_lineRenderer.SetColors(m_Color1, m_Color2);
+		
+	}
+}

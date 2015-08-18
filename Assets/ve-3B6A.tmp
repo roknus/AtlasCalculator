@@ -1,0 +1,63 @@
+﻿using UnityEngine;
+using System.Collections.Generic;
+
+public class NodePath
+{
+    public List<NodeScript> Path { get; set; }
+    public int Count { get { return Path.Count; } }
+
+    public int red;
+    public int green;
+    public int blue;
+
+    public NodePath()
+    {
+        Path = new List<NodeScript>();
+        red = 0;
+        green = 0;
+        blue = 0;
+    }
+    public NodePath(NodePath _other)
+    {
+        Path = new List<NodeScript>(_other.Path);
+    }
+
+    public void Add(NodeScript _n) 
+    {
+        Path.Add(_n); 
+    }
+    public bool Contains(NodeScript _n) { return Path.Contains(_n); }
+
+    public int GetRedSparkCost()
+    {
+        int count = 0;
+        foreach(NodeScript n in Path)
+        {
+            if (!n.m_bUnlocked && n.m_NodeType == NodeScript.NodeType.Might)
+                count += n.m_cost;
+        }
+        return count;
+    }
+
+    public int GetGreenSparkCost()
+    {
+        int count = 0;
+        foreach (NodeScript n in Path)
+        {
+            if (!n.m_bUnlocked && n.m_NodeType == NodeScript.NodeType.Stamina)
+                count += n.m_cost;
+        }
+        return count;
+    }
+
+    public int GetBlueSparkCost()
+    {
+        int count = 0;
+        foreach (NodeScript n in Path)
+        {
+            if (!n.m_bUnlocked && n.m_NodeType == NodeScript.NodeType.Blue)
+                count += n.m_cost;
+        }
+        return count;
+    }
+}
