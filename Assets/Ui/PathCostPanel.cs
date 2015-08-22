@@ -13,6 +13,8 @@ public class PathCostPanel : MonoBehaviour {
 
     public Text Proficency;
 
+    public Text Greatness;
+
 	public static PathCostPanel Instance { get; private set; }
 
 	void Awake () 
@@ -41,6 +43,7 @@ public class PathCostPanel : MonoBehaviour {
         Tot.text        = path.TotSparks.ToString();
         Proficency.text = path.Proficency.ToString();
 		Purple.text 	= path.PurpleSparks.ToString ();
+        Greatness.text  = path.Greatness.ToString();
     }
 
     public void Clean()
@@ -49,7 +52,8 @@ public class PathCostPanel : MonoBehaviour {
         Green.text = "0";
         Blue.text = "0";
         Tot.text = "0";
-		Proficency.text = "0";
-		Purple.text = "0";
+        Purple.text = "0";
+        Proficency.text = "0";
+        Greatness.text = "0";
     }
 }

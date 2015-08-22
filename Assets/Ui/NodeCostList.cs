@@ -30,7 +30,6 @@ public class NodeCostList : MonoBehaviour {
 
 	public void Init(List<KeyValuePair<int, NodePath>> nodeList)
 	{
-		Clear ();
         for(int i = 0; i < 10; i++)
         {
             if (i >= nodeList.Count) break;
@@ -39,19 +38,40 @@ public class NodeCostList : MonoBehaviour {
 
 			Transform t = Instantiate(NodeCostButton) as Transform;
 			t.SetParent(transform);
-			t.GetComponent<NodeCostButton>().Init(  p.Value.Red,
-                                                    p.Value.Green,
-                                                    p.Value.Blue,
-                                                    p.Value.TotSparks,
-                                                    WorldScript.Instance.m_nodes[p.Key]);
+			t.GetComponent<NodeCostButton>().Init(p.Value, WorldScript.Instance.m_nodes[p.Key]);
 		}
 	}
 
 	public void Init(NodePath path)
 	{
-		Clear ();
-		foreach (NodeBase n in path.Path) {
-            // TODO
-		}
 	}
+
+    public void OnEnable()
+    {
+        Clear();
+    }
+
+    public void FindCheapestGreatnessNodes()
+    {
+        List<KeyValuePair<int, NodePath>> res = new List<KeyValuePair<int, NodePath>>();
+        foreach (int i in WorldScript.Instance.m_nodes.Keys)
+        {
+            NodeBase nodebase = WorldScript.Instance.m_nodes[i].GetComponent<NodeBase>();
+            if (nodebase && !nodebase.bUnlocked && nodebase is NodeWithOneStat)
+            {
+                NodeWithOneStat node = nodebase as NodeWithOneStat;
+                if (node.m_Stat1 == Stat1.Greatness)
+                {
+                    res.Add(new KeyValuePair<int, NodePath>(i, node.FindCheapestPath()));
+                }
+            }
+        }
+
+        res.Sort((firstPair, nextPair) =>
+        {
+            return firstPair.Value.TotSparks < nextPair.Value.TotSparks ? -1 : (firstPair.Value.TotSparks > nextPair.Value.TotSparks ? 1 : 0);
+        }
+        );
+        Init(res);
+    }
 }

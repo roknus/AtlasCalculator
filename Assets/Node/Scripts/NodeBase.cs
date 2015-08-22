@@ -10,6 +10,7 @@ public abstract class NodeBase : MonoBehaviour
 	public List<NodeBase>  	m_neighborsInfo;
     public List<int>        m_neighborsIds;
 	public int 				m_weight;
+	public int				m_weightCost;
     public bool             m_Origin;
     private bool            m_highLight;
 	public bool 			HighLight
@@ -85,12 +86,10 @@ public abstract class NodeBase : MonoBehaviour
         {
             if (value)
             {
-                //WorldScript.Instance.m_UnlockedPath.Add(this);
                 m_SpriteRenderer.color = EdgeScript.gold;
             }
             else
             {
-                //WorldScript.Instance.m_UnlockedPath.Remove(this);
                 m_SpriteRenderer.color = EdgeScript.lightBlue;
             }
             m_bUnlocked = value;
@@ -99,7 +98,7 @@ public abstract class NodeBase : MonoBehaviour
 
     public SpriteRenderer m_SpriteRenderer;
 
-	void Awake()
+    void Awake()
 	{
         transform.SetParent(WorldScript.Instance.transform);
 
@@ -132,6 +131,13 @@ public abstract class NodeBase : MonoBehaviour
 
     public abstract Cost GetCost();
     public virtual int GetProficency() { return 0; }
+    public virtual int GetGreatness() { return 0; }
+    public virtual int GetMight() { return 0; }
+    public virtual int GetStamina() { return 0; }
+    public virtual int GetStrength() { return 0; }
+    public virtual int GetValor() { return 0; }
+    public virtual int GetLuck() { return 0; }
+    public virtual int GetSpirit() { return 0; }
 	public abstract string GetName();
 	public abstract XMLNode GetSerialize ();
 	public virtual void Deserialize(XMLNode node)
@@ -332,118 +338,32 @@ public abstract class NodeBase : MonoBehaviour
 			path.Add(bestNeigh);
 			curr = bestNeigh;
 		}
-        //NodePath ret = FindShortestPathRecc(new NodePath());
 		WorldScript.Instance.HighlightPath = path;
     }
 
-    /*
-    public NodePath FindShortestPathRecc(NodePath _path)
+	public void FindAndHighlightCheapestPath()
+    {		
+        WorldScript.Instance.HighlightPath = FindCheapestPath();
+	}
+
+    public NodePath FindCheapestPath()
     {
-        if (_path.Contains(this))
-            return null;
-        if (bUnlocked)
-            return null;
-
-        NodePath listCopy = new NodePath(_path);
-        NodePath shortest = null;
-        listCopy.Add(this);
-        for (int i = 0; i < m_neighbors.Count; i++)
+        NodePath path = new NodePath();
+        path.Add(this);
+        NodeBase curr = this;
+        NodeBase bestNeigh = curr;
+        while (!curr.bUnlocked)
         {
-            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked)
+            foreach (NodeBase n in curr.m_neighborsInfo)
             {
-                listCopy.Add(m_neighbors[i].GetComponent<NodeBase>());
-                return listCopy;
+                if (n.m_weightCost <= bestNeigh.m_weightCost)
+                    bestNeigh = n;
             }
-            else
-            {
-                if (shortest == null)
-                    shortest = m_neighbors[i].GetComponent<NodeBase>().FindShortestPathRecc(listCopy);
-                else
-                {
-                    NodePath ret = m_neighbors[i].GetComponent<NodeBase>().FindShortestPathRecc(listCopy);
-                    if (ret != null && (ret.Count < shortest.Count))
-                        shortest = ret;
-                }
-            }
+            path.Add(bestNeigh);
+            curr = bestNeigh;
         }
-
-        return shortest;
-    }*/
-
-	public void FindCheapestPath(){		
-		NodePath ret = FindCheapestPathRecc(new NodePath ());
-		WorldScript.Instance.HighlightPath = ret;
-	}
-	
-	public NodePath FindCheapestPathRecc(NodePath _path)
-	{
-		if (_path.Contains(this))
-			return null;
-		if (bUnlocked)
-			return null;
-		
-		NodePath listCopy = new NodePath(_path);
-		NodePath shortest = null;
-		listCopy.Add(this);
-		for (int i = 0; i < m_neighbors.Count; i++)
-		{
-			if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked)
-			{
-				listCopy.Add(m_neighbors[i].GetComponent<NodeBase>());
-				return listCopy;
-			}
-			else
-			{
-				if (shortest == null)
-					shortest = m_neighbors[i].GetComponent<NodeBase>().FindCheapestPathRecc(listCopy);
-				else
-				{
-					NodePath ret = m_neighbors[i].GetComponent<NodeBase>().FindCheapestPathRecc(listCopy);
-					if (ret != null && (ret.TotSparks < shortest.TotSparks))
-						shortest = ret;
-				}
-			}
-		}
-		return shortest;
-	}
-
-    // Pas fini
-	public void FindCheapestPathDijkstra()
-	{
-		List<int> dist = new List<int>();
-		List<int> prev = new List<int>();
-		List<NodeBase> Q = new List<NodeBase> ();
-
-		foreach (Transform t in WorldScript.Instance.m_nodes.Values) {
-			dist.Add(int.MaxValue);
-			prev.Add(-1);
-			Q.Add(t.GetComponent<NodeBase>());
-		}
-		dist [m_Id] = 0;
-
-		NodeBase u = this;
-		while (Q.Count > 0) {
-			//Look for node with least dist
-			foreach(NodeBase n in Q)
-			{
-				if(dist[n.m_Id] < dist[u.m_Id]) u = n; 
-			}
-
-			if(u.bUnlocked) break;
-
-			Q.Remove(u);
-
-			foreach(NodeBase neigh in u.m_neighborsInfo)
-			{
-				int alt = dist[u.m_Id] + 1;
-				if(alt  < dist[neigh.m_Id])	
-				{
-					dist[neigh.m_Id] = alt;
-					prev[neigh.m_Id] = u.m_Id;
-				}
-			}
-		}
-	}
+        return path;
+    }
 
     void OnDrawGizmos()
     {

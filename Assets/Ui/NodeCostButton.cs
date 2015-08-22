@@ -2,8 +2,9 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class NodeCostButton : MonoBehaviour {
-
+public class NodeCostButton : MonoBehaviour 
+{
+    public Text Greatness;
 	public Text R;
 	public Text G;
 	public Text B;
@@ -19,18 +20,20 @@ public class NodeCostButton : MonoBehaviour {
 	
 	}
 
-	public void Init(int _R, int _G, int _B, int _T, Transform _node)
+	public void Init(NodePath _path, Transform _node)
 	{
-		R.text = _R.ToString();
-		G.text = _G.ToString();
-		B.text = _B.ToString();
-		T.text = _T.ToString();
+        Greatness.text = _node.GetComponent<NodeBase>().GetGreatness().ToString();
+        R.text = _path.Red.ToString();
+        G.text = _path.Green.ToString();
+        B.text = _path.Blue.ToString();
+        T.text = _path.TotSparks.ToString();
 
 		node = _node;
 		
 		GetComponent<Button>().onClick.AddListener(delegate() 
 		                                           {
 			CameraController.Instance.FocusNode(node);
+            WorldScript.Instance.HighlightPath = _path;
 		});
 	}
 }

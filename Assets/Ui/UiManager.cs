@@ -6,6 +6,12 @@ public class UiManager : MonoBehaviour
 {
     public Image            ForeGroundPanel;
     public RectTransform    ProficencyWindow;
+    public RectTransform    GreatnessNodeList;
+    public Button           ButtonGreatness;
+    public Button           ButtonProficency;
+    public Text             ButtonProficencyText { get; set; }
+
+    public RectTransform    MoreInfosPanel;
 
     public RectTransform    SaveButton;
 
@@ -27,11 +33,14 @@ public class UiManager : MonoBehaviour
         {
             SaveButton.gameObject.SetActive(false);
         }
-	}
-	
-	void Update () 
-    {
-	
+        if (Application.isPlaying)
+        {
+            ButtonProficency.onClick.AddListener(() => { OpenProficencyWindow(); });
+            ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
+
+            ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
+        }
+        GreatnessNodeList.gameObject.SetActive(false);
 	}
 
     public void EnableForeGround()  { ForeGroundPanel.enabled = true; }
@@ -46,5 +55,31 @@ public class UiManager : MonoBehaviour
     {
         EnableForeGround();
         ProficencyWindow.gameObject.SetActive(true);
+    }
+
+    public void EnableGreatnessNodeList()
+    {
+        GreatnessNodeList.gameObject.SetActive(true);
+        NodeCostList.Instance.FindCheapestGreatnessNodes();
+        ButtonGreatness.GetComponentInChildren<Text>().text = "Close";
+        ButtonGreatness.onClick.RemoveAllListeners();
+        ButtonGreatness.onClick.AddListener(() => { DisableGreatnessNodeList(); });
+    }
+
+    public void DisableGreatnessNodeList()
+    {
+        ButtonGreatness.GetComponentInChildren<Text>().text = "Cheapest Greatness Nodes";
+        ButtonGreatness.onClick.RemoveAllListeners();
+        ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
+        GreatnessNodeList.gameObject.SetActive(false);
+    }
+
+    public void SwitchMoreInfos()
+    {
+        MoreInfosPanel.gameObject.SetActive(!MoreInfosPanel.gameObject.activeSelf);
+        if(WorldScript.Instance.HighlightPath != null)
+        {
+            PathStatsPanel.Instance.SetPanel(WorldScript.Instance.HighlightPath);
+        }
     }
 }

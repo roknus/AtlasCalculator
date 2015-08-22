@@ -92,7 +92,7 @@ public class NodeToolTipScript : MonoBehaviour
 			case CostType.GreenSpark:
 				CostIcon.sprite = GreenSpark;
 				break;
-			case CostType.PurpleSpark:
+			case CostType.PinkSparks:
 				CostIcon.sprite = PurpleSpark;
 				break;
 			case CostType.RedSpark:				

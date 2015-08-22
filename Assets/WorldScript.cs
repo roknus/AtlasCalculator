@@ -34,11 +34,18 @@ public class WorldScript : MonoBehaviour
 	public Transform        edge;
 	public Dictionary<int, Transform>  m_nodes;
 
-    public  NodePath     m_UnlockedPath;
-    public  NodePath     m_UnlockedPath_Simulation;
-    public  Button       ButtonProficency;
-    public  Text         ButtonSimulation;
-	private NodePath     m_hightLightPath;
+    public  NodePath        m_UnlockedPath;
+    public  NodePath        m_UnlockedPath_Simulation;
+    public  Text            ButtonSimulation;
+	private NodePath        m_hightLightPath;
+
+    private bool m_IgnorePinkNodes;
+    public bool IgnorePinkNodes
+    {
+        get { return m_IgnorePinkNodes; }
+        set { m_IgnorePinkNodes = value; }
+    }
+
     public NodePath      HighlightPath
     { 
 		get{ return m_hightLightPath; }
@@ -49,6 +56,10 @@ public class WorldScript : MonoBehaviour
 				m_hightLightPath = value;
 	            PathCostPanel.Instance.gameObject.SetActive(true);
                 PathCostPanel.Instance.SetPanel(m_hightLightPath);
+                if (PathStatsPanel.Instance != null)
+                {
+                    PathStatsPanel.Instance.SetPanel(m_hightLightPath);
+                }
 	            foreach (NodeBase n in m_hightLightPath.Path)
 	            {
 					n.HighLight = true;
@@ -94,7 +105,6 @@ public class WorldScript : MonoBehaviour
 			return;
 
         CalculateNodesWeight();
-		ButtonProficency.onClick.AddListener(() => { UiManager.Instance.OpenProficencyWindow(); });
 	}
 
     void Update()
@@ -110,7 +120,7 @@ public class WorldScript : MonoBehaviour
 
 	IEnumerator LoadAtlasXML()
 	{
-        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas.xml");	
+        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas2.xml");	
 		
 		yield return ret;
 		
@@ -173,29 +183,55 @@ public class WorldScript : MonoBehaviour
 		foreach (Transform c in transform)
 		{
 			NodeBase n = c.GetComponent<NodeBase>();
-			if(n.GetComponent<NodeBase>().bUnlocked)
+			if(n.bUnlocked)
 			{
-				m_UnlockedPath.Add(n.GetComponent<NodeBase>());
-				n.GetComponent<NodeBase>().m_weight = 0;
+				m_UnlockedPath.Add(n);
+				n.m_weight = 0;
+				n.m_weightCost = 0;
 			}
 			else
 			{
-				n.GetComponent<NodeBase>().m_weight = int.MaxValue;
+				n.m_weight = int.MaxValue;
+				n.m_weightCost = int.MaxValue;
 			} 
 		}
 	}	
+
+    public void SwitchIgnorePinkNodes(bool _b)
+    {
+        IgnorePinkNodes = !IgnorePinkNodes;
+        CalculateNodesWeight();
+    }
 	
 	public void CalculateNodesWeight()
 	{
 		ResetNodeWeight ();
 		
-		foreach (NodeBase n in m_UnlockedPath.Path) {
-			foreach(NodeBase neigh in n.m_neighborsInfo)
-			{
+		foreach (NodeBase n in m_UnlockedPath.Path) 
+		{
+			foreach (NodeBase neigh in n.m_neighborsInfo)
+            {
+                // Avoid pink nodes
+                if (WorldScript.Instance.IgnorePinkNodes && neigh is NodeWithCost)
+                {
+                    NodeWithCost nc = neigh as NodeWithCost;
+                    if (nc.m_CostType == CostType.PinkSparks)
+                    {
+                        continue;
+                    }
+                }
+
+				// If the neighbors has lower cost by passing by this node, update it
 				if(neigh.m_weight > n.m_weight+1)
 				{
 					neigh.m_weight = 1;
 					CalculateWeightRecc(neigh);
+				}
+				int cost = neigh.GetCost().Tot;
+				if(neigh.m_weightCost > n.m_weightCost + cost)
+				{
+					neigh.m_weightCost = cost;
+					CalculateWeightCostRecc(neigh);
 				}
 			}
 		}
@@ -204,11 +240,44 @@ public class WorldScript : MonoBehaviour
 	public void CalculateWeightRecc(NodeBase n)
 	{		
 		foreach(NodeBase neigh in n.m_neighborsInfo)
-		{
+        {
+            // Avoid pink nodes
+            if (WorldScript.Instance.IgnorePinkNodes && neigh is NodeWithCost)
+            {
+                NodeWithCost nc = neigh as NodeWithCost;
+                if (nc.m_CostType == CostType.PinkSparks)
+                {
+                    continue;
+                }
+            }
+
 			if(neigh.m_weight > n.m_weight+1)
 			{
 				neigh.m_weight = n.m_weight+1;
 				CalculateWeightRecc(neigh);
+			}
+		}
+	}
+
+	public void CalculateWeightCostRecc(NodeBase n)
+	{
+		foreach (NodeBase neigh in n.m_neighborsInfo)
+        {
+            // Avoid pink nodes
+            if (WorldScript.Instance.IgnorePinkNodes && neigh is NodeWithCost)
+            {
+                NodeWithCost nc = neigh as NodeWithCost;
+                if (nc.m_CostType == CostType.PinkSparks)
+                {
+                    continue;
+                }
+            }
+
+			int cost = neigh.GetCost().Tot;
+			if(neigh.m_weightCost > n.m_weightCost + cost)
+			{
+				neigh.m_weightCost = n.m_weightCost + cost;
+				CalculateWeightCostRecc(neigh);
 			}
 		}
 	}
@@ -308,7 +377,7 @@ public class WorldScript : MonoBehaviour
 			else if(n is XMLNodeWithOneStat)
 			{
                 //Special case for purple nodes
-                if (((XMLNodeWithOneStat)n).m_Cost.type == (int)(CostType.PurpleSpark))
+                if (((XMLNodeWithOneStat)n).m_Cost.type == (int)(CostType.PinkSparks))
                 {
                     t = Instantiate(PurpleNode) as Transform;
                 }
@@ -401,30 +470,6 @@ public class WorldScript : MonoBehaviour
 		}
 	}
 
-	public void FindCheapestGreatnessNodes()
-	{
-        List<KeyValuePair<int, NodePath>> res = new List<KeyValuePair<int, NodePath>>();
-		foreach (int i in m_nodes.Keys) 
-        {
-            NodeBase nodebase = m_nodes[i].GetComponent<NodeBase>();
-			if(nodebase && !nodebase.bUnlocked && nodebase is NodeWithOneStat)
-			{
-				NodeWithOneStat node = nodebase as NodeWithOneStat;
-				if(node.m_Stat1 == Stat1.Greatness)
-				{
-					res.Add(new KeyValuePair<int, NodePath>(i, node.FindCheapestPathRecc(new NodePath())));
-				}
-			}
-		}
-		
-		res.Sort((firstPair,nextPair) =>
-		            {
-			return firstPair.Value.TotSparks < nextPair.Value.TotSparks ? -1 : (firstPair.Value.TotSparks > nextPair.Value.TotSparks ? 1 : 0);
-		}
-		);
-		NodeCostList.Instance.Init (res);
-	}
-
 	public static int CompareProficency(NodeBase n1, NodeBase n2)
 	{
 		if (n1 is NodeWithTwoStat && n2 is NodeWithTwoStat) {
@@ -444,9 +489,9 @@ public class WorldScript : MonoBehaviour
 
     public void Optimize(int proficency)
 	{
-		ButtonProficency.GetComponentInChildren<Text>().text = "Calculating ...";
-		ButtonProficency.onClick.RemoveAllListeners ();
-		ButtonProficency.onClick.AddListener (() => { InteruptOptimization(); });
+        UiManager.Instance.ButtonProficencyText.text = "Calculating ...";
+        UiManager.Instance.ButtonProficency.onClick.RemoveAllListeners();
+        UiManager.Instance.ButtonProficency.onClick.AddListener(() => { InteruptOptimization(); });
 		CleanHighlight();
         StartCoroutine(StartOptimize(proficency));
     }
@@ -463,9 +508,9 @@ public class WorldScript : MonoBehaviour
 			HighlightPath = bestPath;
 		}
 
-		ButtonProficency.onClick.RemoveAllListeners ();
-		ButtonProficency.onClick.AddListener (() => { UiManager.Instance.OpenProficencyWindow(); });
-		ButtonProficency.GetComponentInChildren<Text>().text = "Optimize Proficency";
+        UiManager.Instance.ButtonProficency.onClick.RemoveAllListeners();
+        UiManager.Instance.ButtonProficency.onClick.AddListener(() => { UiManager.Instance.OpenProficencyWindow(); });
+        UiManager.Instance.ButtonProficencyText.text = "Optimize Proficency";
 	}
 	
     public IEnumerator StartOptimize(int proficency)
@@ -493,8 +538,8 @@ public class WorldScript : MonoBehaviour
 			}
 			HighlightPath = bestPath;
 		}
-		
-		ButtonProficency.GetComponentInChildren<Text>().text = "Optimize Proficency";
+
+        UiManager.Instance.ButtonProficencyText.text = "Optimize Proficency";
 	}
 	
 	public static List<NodeBase> best;
@@ -526,14 +571,14 @@ public class WorldScript : MonoBehaviour
                 { 
                     best = pathCopy;
                     bestSparks = newSparks;
-                    ButtonProficency.GetComponentInChildren<Text>().text = "Calculating (Best : " + bestSparks.Tot + " Sparks)";
+                    UiManager.Instance.ButtonProficencyText.text = "Calculating (Best : " + bestSparks.Tot + " Sparks)";
 				}
 			} 
 			else
 			{ 
 				best = pathCopy;
 				bestSparks = newSparks;
-				ButtonProficency.GetComponentInChildren<Text>().text = "Calculating (Best : " + bestSparks.Tot + " Sparks)";
+                UiManager.Instance.ButtonProficencyText.text = "Calculating (Best : " + bestSparks.Tot + " Sparks)";
 			}
 		}
         else
@@ -599,9 +644,9 @@ public class WorldScript : MonoBehaviour
 
     public void Maximize(int r, int g, int b, int sparksLeft)
     {
-        ButtonProficency.GetComponentInChildren<Text>().text = "Calculating ...";
-        ButtonProficency.onClick.RemoveAllListeners();
-        ButtonProficency.onClick.AddListener(() => { InteruptOptimization(); });
+        UiManager.Instance.ButtonProficencyText.text = "Calculating ...";
+        UiManager.Instance.ButtonProficency.onClick.RemoveAllListeners();
+        UiManager.Instance.ButtonProficency.onClick.AddListener(() => { InteruptOptimization(); });
         CleanHighlight();
         StartCoroutine(StartMaximize(r, g, b, sparksLeft));
     }
@@ -674,7 +719,7 @@ public class WorldScript : MonoBehaviour
         {
             best = pathCopy;
             bestProficency = newPro;
-            ButtonProficency.GetComponentInChildren<Text>().text = "Calculating (Best : " + bestProficency + " Proficency)";
+            UiManager.Instance.ButtonProficencyText.text = "Calculating (Best : " + bestProficency + " Proficency)";
         }
         else
         {

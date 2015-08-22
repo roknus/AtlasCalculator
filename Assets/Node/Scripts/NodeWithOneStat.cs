@@ -4,7 +4,7 @@ using Serializer;
 
 public enum Stat1
 {
-    Might 		= 0,
+    Might = 0,
 	Stamina		= 1,
     Luck 		= 2,
     Valor 		= 3,
@@ -31,4 +31,12 @@ public class NodeWithOneStat : NodeWithPrestige
 		m_Stat1 = (Stat1)nodeWith1Stat.m_Stat1;
 		value1 = nodeWith1Stat.value1;
 	}
+
+    public override int GetGreatness() { return (m_Stat1 == Stat1.Greatness) ? value1 : 0; }
+    public override int GetMight() { return (m_Stat1 == Stat1.Might) ? value1 : 0; }
+    public override int GetStamina() { return (m_Stat1 == Stat1.Stamina) ? value1 : 0; }
+    public override int GetStrength() { return (m_Stat1 == Stat1.Strenght) ? value1 : 0; }
+    public override int GetValor() { return (m_Stat1 == Stat1.Valor) ? value1 : 0; }
+    public override int GetLuck() { return (m_Stat1 == Stat1.Luck) ? value1 : 0; }
+    public override int GetSpirit() { return (m_Stat1 == Stat1.Spirit) ? value1 : 0; }
 }

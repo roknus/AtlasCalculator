@@ -30,7 +30,7 @@ public class MouseController : MonoBehaviour {
 				FindCheapestPathButton.onClick.RemoveAllListeners();
 				FindCheapestPathButton.onClick.AddListener(delegate() 
 				                                           {
-					hit.transform.GetComponent<NodeBase>().FindCheapestPath();
+					hit.transform.GetComponent<NodeBase>().FindAndHighlightCheapestPath();
 					RightClickOption.gameObject.SetActive(false);
 				});
 			}

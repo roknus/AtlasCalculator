@@ -7,7 +7,7 @@ public enum CostType
     RedSpark 		= 0,
     GreenSpark 		= 1,
     BlueSpark 		= 2,
-    PurpleSpark 	= 3,
+    PinkSparks 	    = 3,
     Transformation 	= 4,
     Diamond 		= 5
 }
@@ -36,8 +36,8 @@ public abstract class NodeWithCost : NodeBase
             cost.G += m_Cost;
         if(m_CostType == CostType.BlueSpark)
             cost.B += m_Cost;
-		if (m_CostType == CostType.PurpleSpark)
-			cost.Purple += m_Cost;
+        if (m_CostType == CostType.PinkSparks)
+            cost.Pink += m_Cost;
         return cost;
     }
 }

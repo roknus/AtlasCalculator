@@ -14,15 +14,15 @@ public class Cost
         }
     }
 
-	public int Purple { get; set; }
+	public int Pink { get; set; }
 
-    public Cost (int r, int g, int b, int spare = 0, int purple = 0)
+    public Cost (int r, int g, int b, int spare = 0, int pink = 0)
     {
         R = r;
         G = g;
         B = b;
         Spare = spare;
-		Purple = purple;
+        Pink = pink;
     }
 
     public Cost (Cost other)
@@ -31,16 +31,16 @@ public class Cost
         G = other.G;
         B = other.B;
         Spare = other.Spare;
-		Purple = other.Purple;
+		Pink = other.Pink;
     }
 
     public static Cost operator +(Cost c1, Cost c2)
     {
-        return new Cost(c1.R + c2.R, c1.G + c2.G, c1.B + c2.B, c1.Spare + c2.Spare, c1.Purple + c2.Purple);
+        return new Cost(c1.R + c2.R, c1.G + c2.G, c1.B + c2.B, c1.Spare + c2.Spare, c1.Pink + c2.Pink);
     }
     public static Cost operator -(Cost c1, Cost c2)
     {
-		return new Cost(c1.R - c2.R, c1.G - c2.G, c1.B - c2.B, c1.Spare - c2.Spare, c1.Purple - c2.Purple);
+		return new Cost(c1.R - c2.R, c1.G - c2.G, c1.B - c2.B, c1.Spare - c2.Spare, c1.Pink - c2.Pink);
     }
     public static bool operator <(Cost c1, Cost c2)
     {

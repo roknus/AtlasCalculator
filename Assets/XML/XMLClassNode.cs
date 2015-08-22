@@ -11,6 +11,9 @@ namespace Serializer
         [XmlElement("ClassName")]
         public string m_ClassName;
 
+        [XmlElement("Class")]
+        public Classes m_Class;
+
         public XMLClassNode()
         {
 
@@ -20,6 +23,7 @@ namespace Serializer
             : base(node)
         {
             m_ClassName = node.ClassName;
+            m_Class     = node.m_Class;
         }
     }
 }
