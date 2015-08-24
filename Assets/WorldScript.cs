@@ -428,7 +428,6 @@ public class WorldScript : MonoBehaviour
             c.GetComponent<NodeBase>().InitNode();
         }
         InitEdges();
-        CalculateNodesWeight();
 
 		Debug.Log("Deserialization Done !");
 	}
@@ -468,6 +467,8 @@ public class WorldScript : MonoBehaviour
                 n.bUnlocked = true;
             }
 		}
+
+        CalculateNodesWeight();
 	}
 
 	public static int CompareProficency(NodeBase n1, NodeBase n2)
