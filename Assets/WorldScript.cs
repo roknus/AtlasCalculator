@@ -668,18 +668,20 @@ public class WorldScript : MonoBehaviour
                 }
             }
         }
+        voisin.Sort(CompareProficency);
 		yield return StartCoroutine(MaximizeRecc(voisin, path, 0, new Cost(r, g, b, sparksLeft), 0));
-		Debug.Log (bestProficency);
-        NodePath bestPath = new NodePath();
-        if(best == null)
+
+        if (best != null)
         {
-            yield break;
+            NodePath bestPath = new NodePath();
+            foreach (NodeBase n in best)
+            {
+                bestPath.Add(n);
+            }
+            HighlightPath = bestPath;
         }
-        foreach (NodeBase n in best)
-        {
-            bestPath.Add(n);
-        }
-        HighlightPath = bestPath;
+
+        UiManager.Instance.ButtonProficencyText.text = "Optimize Proficency";
     }
     
     public static int bestProficency;
@@ -687,11 +689,6 @@ public class WorldScript : MonoBehaviour
     {
         if (voisin.Count < 1) yield break;
         if (offset >= voisin.Count) yield break;
-
-        if (offset < voisin.Count)
-        {
-			yield return StartCoroutine(MaximizeRecc(voisin, path, proficency, sparks, offset + 1));
-        }
 
         List<NodeBase> newVoisin = new List<NodeBase>();
         for (int i = offset; i < voisin.Count; i++)
@@ -708,36 +705,50 @@ public class WorldScript : MonoBehaviour
 
         if (newSparks.isNegative()) yield break;
 
-        foreach (NodeBase n in curr.m_neighborsInfo)
+        if (newPro > bestProficency || (newPro == bestProficency && newSparks.Tot > bestSparks.Tot))
         {
-            if (!pathCopy.Contains(n) && !newVoisin.Contains(n))
-            {
-                newVoisin.Add(n);
-            }
-        }
-
-        if (newPro > bestProficency)
-        {
+            //Debug.Log(newPro + " " + newSparks.R + " " + newSparks.G + " " + newSparks.B + " ");
             best = pathCopy;
             bestProficency = newPro;
+            bestSparks = newSparks;
             UiManager.Instance.ButtonProficencyText.text = "Calculating (Best : " + bestProficency + " Proficency)";
         }
-        else
+
+        newVoisin.Remove(curr);
+            
+		/** Heuristic 1
+			* Sort the neighbors by their type, there is a big chance that the best path will be the one with most of green/red nodes.
+			* Plus, the ratio of cost/proficency is better as the cost is low, so sort it also by cost 
+		*/ 
+		foreach (NodeBase n in curr.m_neighborsInfo)
+		{
+			if (!newVoisin.Contains(n) &&!pathCopy.Contains(n))
+			{
+				newVoisin.Add(n);	
+			}
+		}
+        newVoisin.Sort(CompareProficency);
+
+		bool cont = true;
+        /** Heuristic 2
+            * Calculate the difference between the current best sparks and current path sparks
+            * the top ratio for proficency is 23 sparks for 1 proficency
+            * So if sparkLeft * topRatio < val no need to continue because you won't be able te beat best even with perfect nodes
+        */
+        if (best != null)
         {
-            /** Heuristic 1
-             * Calculate the difference between the current best sparks and current path sparks
-             * the top ratio for proficency is 23 sparks for 1 proficency
-             * So if sparkLeft * topRatio < val no need to continue because you won't be able te beat best even with perfect nodes
-            */
-            if (best != null)
+            //Cost sparksLeft = sparks - newSparks;
+            if ((newPro + (newSparks.Tot / 23.0f)) < bestProficency)
             {
-                //Cost sparksLeft = sparks - bestProficency;
-				if ((newPro + (newSparks.Tot / 23.0f)) < bestProficency)
-                {
-                    yield break;
-                }
+                cont = false;
             }
+		}
+		if(cont)
+            yield return StartCoroutine(MaximizeRecc(newVoisin, pathCopy, newPro, newSparks, 0));
+
+        if (offset < voisin.Count)
+        {
+            yield return StartCoroutine(MaximizeRecc(voisin, path, proficency, sparks, offset + 1));
         }
-        yield return StartCoroutine(MaximizeRecc(newVoisin, pathCopy, newPro, newSparks, 1));
     }
 }

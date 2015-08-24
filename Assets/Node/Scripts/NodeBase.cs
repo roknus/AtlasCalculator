@@ -52,6 +52,8 @@ public abstract class NodeBase : MonoBehaviour
         {
             if (value)
             {
+                if (m_bSimulationUnlock) return; // Prevent bug that add node cost even if its already unlocked
+
                 WorldScript.Instance.m_UnlockedPath_Simulation.Add(this);
                 m_SpriteRenderer.color = Color.red;
             }

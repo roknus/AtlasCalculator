@@ -66,7 +66,7 @@ public class User : MonoBehaviour
 
     public void StartLoadDefaultUserXML()
     {
-        StartCoroutine("LoadUserXML", "http://" + ServerHostname + "/atlas/AtlasCalculator/default3.xml");
+        StartCoroutine("LoadUserXML", "http://" + ServerHostname + "/atlas/AtlasCalculator/default.xml");
     }
 
     IEnumerator LoadUserXML(string url)
