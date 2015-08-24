@@ -24,6 +24,8 @@ public class NodePath
     public int Luck;
     public int Spirit;
 
+    public int Prestige;
+
     public NodePath()
     {
         Path = new HashSet<NodeBase>();
@@ -36,7 +38,9 @@ public class NodePath
         Valor = 0;
         Luck = 0;
         Spirit = 0;
+        Prestige = 0;
     }
+
     public NodePath(NodePath _other)
     {
         Path = new HashSet<NodeBase>(_other.Path);
@@ -49,6 +53,7 @@ public class NodePath
         Valor = _other.Valor;
         Luck = _other.Luck;
         Spirit = _other.Spirit;
+        Prestige = _other.Prestige;
     }
 
     public void Add(NodeBase _n) 
@@ -67,6 +72,7 @@ public class NodePath
                 Valor += _n.GetValor();
                 Luck += _n.GetLuck();
                 Spirit += _n.GetSpirit();
+                Prestige += _n.GetPrestige();
             }
 		}
     }
@@ -86,6 +92,7 @@ public class NodePath
             Valor -= _n.GetValor();
             Luck -= _n.GetLuck();
             Spirit -= _n.GetSpirit();
+            Prestige -= _n.GetPrestige();
         }
     }
 

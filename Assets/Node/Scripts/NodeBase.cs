@@ -138,6 +138,7 @@ public abstract class NodeBase : MonoBehaviour
     public virtual int GetValor() { return 0; }
     public virtual int GetLuck() { return 0; }
     public virtual int GetSpirit() { return 0; }
+    public virtual int GetPrestige() { return 0; }
 	public abstract string GetName();
 	public abstract XMLNode GetSerialize ();
 	public virtual void Deserialize(XMLNode node)
@@ -329,7 +330,14 @@ public abstract class NodeBase : MonoBehaviour
         path.Add(this);
 		NodeBase curr = this;
 		NodeBase bestNeigh = curr;
-		while (!curr.bUnlocked) {
+		while (!curr.bUnlocked) 
+        {
+            // Node is unreachable because of ignore pink node
+            if(curr.m_weight == int.MaxValue)
+            {
+                UiManager.Instance.ShowAlertMessage("Couldn't find any path without pink nodes");
+                return;
+            }
 			foreach(NodeBase n in curr.m_neighborsInfo)
 			{
 				if(n.m_weight < bestNeigh.m_weight)
@@ -354,6 +362,12 @@ public abstract class NodeBase : MonoBehaviour
         NodeBase bestNeigh = curr;
         while (!curr.bUnlocked)
         {
+            // Node is unreachable because of ignore pink node
+            if (curr.m_weightCost == int.MaxValue)
+            {
+                UiManager.Instance.ShowAlertMessage("Couldn't find any path without pink nodes");
+                return null;
+            }
             foreach (NodeBase n in curr.m_neighborsInfo)
             {
                 if (n.m_weightCost <= bestNeigh.m_weightCost)

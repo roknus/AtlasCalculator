@@ -14,4 +14,9 @@ public abstract class NodeWithPrestige : NodeWithCost
 
 		m_Prestige = prestigeNode.m_Prestige;
 	}
+
+    public override int GetPrestige()
+    {
+        return m_Prestige;
+    }
 }

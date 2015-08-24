@@ -7,6 +7,7 @@ public class UiManager : MonoBehaviour
     public Image            ForeGroundPanel;
     public RectTransform    ProficencyWindow;
     public RectTransform    GreatnessNodeList;
+    public AlertMessage     AlertMessage;
     public Button           ButtonGreatness;
     public Button           ButtonProficency;
     public Text             ButtonProficencyText { get; set; }
@@ -81,5 +82,12 @@ public class UiManager : MonoBehaviour
         {
             PathStatsPanel.Instance.SetPanel(WorldScript.Instance.HighlightPath);
         }
+    }
+
+    public void ShowAlertMessage(string message)
+    {
+        EnableForeGround();
+        AlertMessage.gameObject.SetActive(true);
+        AlertMessage.Message.text = message;
     }
 }
