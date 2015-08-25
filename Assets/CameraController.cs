@@ -6,7 +6,7 @@ public class CameraController : MonoBehaviour
 	public float    XSpeed;
 	public float    YSpeed;
 
-    public int      zoomSpeed;
+    public float      zoomSpeed;
     private float   m_ZDistance;
     public float    ZDistance
     {
@@ -38,7 +38,7 @@ public class CameraController : MonoBehaviour
 			float v = YSpeed * -Input.GetAxis("Mouse Y");
 
             // ZDistance factor make the camera feels the same speed whatever the distance
-            transform.Translate(new Vector3(h, 0, v) * Time.deltaTime * XSpeed * ZDistance, Space.World);			
+            transform.Translate(new Vector3(h, 0, v) * XSpeed * ZDistance, Space.World);			
 		}
         float w = Input.GetAxis("Mouse ScrollWheel");
         if(w != 0)
@@ -57,11 +57,11 @@ public class CameraController : MonoBehaviour
             {
                 if (transform.position.y < ZDistance)
                 {
-                    transform.Translate(new Vector3(0, 0, -Mathf.Abs(transform.position.y - ZDistance)) * zoomSpeed * Time.deltaTime, Space.Self);
+                    transform.Translate(new Vector3(0, 0, -Mathf.Abs(transform.position.y - ZDistance)) * zoomSpeed, Space.Self);
                 }
                 else
                 {
-                    transform.Translate(new Vector3(0, 0, Mathf.Abs(transform.position.y - ZDistance)) * zoomSpeed * Time.deltaTime, Space.Self);
+                    transform.Translate(new Vector3(0, 0, Mathf.Abs(transform.position.y - ZDistance)) * zoomSpeed, Space.Self);
                 }
                 yield return null;
             }
