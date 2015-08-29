@@ -4,17 +4,27 @@ using System.Collections;
 
 public class UiManager : MonoBehaviour 
 {
+    public RectTransform    MainMenu;
+    public RectTransform    Calculateur;
     public Image            ForeGroundPanel;
+
     public RectTransform    ProficencyWindow;
     public RectTransform    GreatnessNodeList;
     public AlertMessage     AlertMessage;
     public Button           ButtonGreatness;
     public Button           ButtonProficency;
     public Text             ButtonProficencyText { get; set; }
+    public Button           SimulationButton;
+
+    public RectTransform    RightClickPanel;
+    public Button           FindShortestPathButton;
+    public Button           FindCheapestPathButton;
+
+    public Toggle           IgnorePinkNodes;
 
     public RectTransform    MoreInfosPanel;
 
-    public RectTransform    SaveButton;
+    public Button           SaveButton;
 
     public static UiManager Instance { get; private set; }
 
@@ -28,21 +38,29 @@ public class UiManager : MonoBehaviour
         else
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
+	}
 
-        if(!WorldScript.Instance.EDITOR_MODE && (User.Instance == null || !User.Instance.Connected))
+    public void InitCalculatorUI()
+    {
+        SaveButton.onClick.AddListener(() => WorldScript.Instance.SaveAtlas());
+        if (!WorldScript.Instance.EDITOR_MODE && (User.Instance == null || !User.Instance.Connected))
         {
             SaveButton.gameObject.SetActive(false);
         }
-        if (Application.isPlaying)
-        {
-            ButtonProficency.onClick.AddListener(() => { OpenProficencyWindow(); });
-            ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
 
-            ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
-        }
+        ButtonProficency.onClick.AddListener(() => { OpenProficencyWindow(); });
+        ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
+
+        ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
+
+        SimulationButton.onClick.AddListener(() => { WorldScript.Instance.SwitchSimulation(); });
+
+        IgnorePinkNodes.onValueChanged.AddListener((b) => WorldScript.Instance.SwitchIgnorePinkNodes(b));
+        
         GreatnessNodeList.gameObject.SetActive(false);
-	}
+    }
 
     public void EnableForeGround()  { ForeGroundPanel.enabled = true; }
     public void DisableForeGround() 
@@ -89,5 +107,29 @@ public class UiManager : MonoBehaviour
         EnableForeGround();
         AlertMessage.gameObject.SetActive(true);
         AlertMessage.Message.text = message;
+    }
+
+    public void ShowRightClickPanel(Vector3 _pos, NodeBase _n)
+    {
+        RightClickPanel.position = _pos;
+        RightClickPanel.gameObject.SetActive(true);
+        FindShortestPathButton.onClick.RemoveAllListeners();
+        FindShortestPathButton.onClick.AddListener(delegate()
+        {
+            _n.FindShortestPath();
+            RightClickPanel.gameObject.SetActive(false);
+        });
+        FindCheapestPathButton.onClick.RemoveAllListeners();
+        FindCheapestPathButton.onClick.AddListener(delegate()
+        {
+            _n.FindAndHighlightCheapestPath();
+            RightClickPanel.gameObject.SetActive(false);
+        });
+    }
+
+    public void ShowCalculatorUI()
+    {
+        MainMenu.gameObject.SetActive(false);
+        Calculateur.gameObject.SetActive(true);
     }
 }

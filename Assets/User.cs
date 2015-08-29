@@ -12,6 +12,9 @@ public class User : MonoBehaviour
     public InputField Username;
     public InputField Password;
 
+    public RectTransform Foreground;
+    public AlertMessage AlertMessage;
+
     public bool bUserGraphLoaded;
     public string XMLUserGraph { get; set; }
 
@@ -55,6 +58,12 @@ public class User : MonoBehaviour
             {
                 Connected = true;
                 LoadAtlas();
+            }
+            else
+            {
+                Foreground.GetComponent<Image>().enabled = true;
+                AlertMessage.Message.text = "Wrong username or password";
+                AlertMessage.gameObject.SetActive(true);
             }
         }
     }

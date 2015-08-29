@@ -4,9 +4,9 @@ using System.Collections;
 
 public class MouseController : MonoBehaviour {
 
-	public RectTransform 	RightClickOption;
-	public Button			FindShortestPathButton;
-	public Button			FindCheapestPathButton;
+	//public RectTransform 	RightClickOption;
+	//public Button			FindShortestPathButton;
+	//public Button			FindCheapestPathButton;
 
 	void Start () {
 	
@@ -19,20 +19,22 @@ public class MouseController : MonoBehaviour {
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 			if(Physics.Raycast(ray, out hit, 1 << 8))
 		   	{
+                UiManager.Instance.ShowRightClickPanel(Input.mousePosition, hit.transform.GetComponent<NodeBase>());
+                /*
 				RightClickOption.position = Input.mousePosition;
 				RightClickOption.gameObject.SetActive(true);
 				FindShortestPathButton.onClick.RemoveAllListeners();
 				FindShortestPathButton.onClick.AddListener(delegate() 
 				                                           {
-           		hit.transform.GetComponent<NodeBase>().FindShortestPath();
-				RightClickOption.gameObject.SetActive(false);
+           		    hit.transform.GetComponent<NodeBase>().FindShortestPath();
+				    RightClickOption.gameObject.SetActive(false);
 				});
 				FindCheapestPathButton.onClick.RemoveAllListeners();
 				FindCheapestPathButton.onClick.AddListener(delegate() 
 				                                           {
 					hit.transform.GetComponent<NodeBase>().FindAndHighlightCheapestPath();
 					RightClickOption.gameObject.SetActive(false);
-				});
+				});*/
 			}
 		}
 	}

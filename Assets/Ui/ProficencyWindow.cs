@@ -20,4 +20,9 @@ public class ProficencyWindow : MonoBehaviour
 		WorldScript.Instance.Optimize(int.Parse(p));
 		UiManager.Instance.DisableForeGround();
 	}
+
+    public void Cancel()
+    {
+        UiManager.Instance.DisableForeGround();
+    }
 }

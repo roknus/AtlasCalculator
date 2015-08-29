@@ -34,4 +34,9 @@ public class MaximizeProficencyWindow : MonoBehaviour
 		WorldScript.Instance.Maximize(int.Parse(r), int.Parse(g), int.Parse(b), int.Parse(spare));
 		UiManager.Instance.DisableForeGround();
 	}
+
+    public void Cancel()
+    {
+        UiManager.Instance.DisableForeGround();
+    }
 }

@@ -104,6 +104,9 @@ public class WorldScript : MonoBehaviour
 		if(!Application.isPlaying)
 			return;
 
+        UiManager.Instance.ShowCalculatorUI();
+        UiManager.Instance.InitCalculatorUI();
+
         CalculateNodesWeight();
 	}
 
@@ -325,12 +328,12 @@ public class WorldScript : MonoBehaviour
             {
                 n.GetComponent<NodeBase>().bSimulationUnlock = false;
             }
-            ButtonSimulation.text = "Simulation (OFF)";
+            UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (OFF)";
         }
         else
         {
             m_UnlockedPath_Simulation = new NodePath();
-            ButtonSimulation.text = "Simulation (ON)";
+            UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (ON)";
         }
     }
 
@@ -432,7 +435,7 @@ public class WorldScript : MonoBehaviour
 		Debug.Log("Deserialization Done !");
 	}
 
-	public void SaveUserGraph()
+	private void SaveUserGraph()
 	{
 		var serializer = new XmlSerializer(typeof(UserNodeSerializer));
 		UserNodeSerializer nodeSerializer = new UserNodeSerializer();
