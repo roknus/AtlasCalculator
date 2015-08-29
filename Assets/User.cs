@@ -7,8 +7,6 @@ public class User : MonoBehaviour
 {
     public static string ServerHostname = "www.prestige-guilde.xyz";
 
-    public static User Instance { get; private set; }
-
     public InputField Username;
     public InputField Password;
 
@@ -22,10 +20,13 @@ public class User : MonoBehaviour
 
     private bool bTryingToConnect;
 
+    public static User Instance { get; private set; }
+
     void Awake()
     {
         if (Instance != null)
         {
+            Destroy(gameObject);
             return;
         }
         else

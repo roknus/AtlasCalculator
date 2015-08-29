@@ -22,7 +22,8 @@ public class UiManager : MonoBehaviour
 
     public Toggle           IgnorePinkNodes;
 
-    public RectTransform    MoreInfosPanel;
+    public RectTransform    StatsInfoPanel;
+    public Button           MoreInfosButton;
 
     public Button           SaveButton;
 
@@ -54,6 +55,8 @@ public class UiManager : MonoBehaviour
         ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
 
         ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
+
+        MoreInfosButton.onClick.AddListener(() => SwitchMoreInfos());
 
         SimulationButton.onClick.AddListener(() => { WorldScript.Instance.SwitchSimulation(); });
 
@@ -95,7 +98,7 @@ public class UiManager : MonoBehaviour
 
     public void SwitchMoreInfos()
     {
-        MoreInfosPanel.gameObject.SetActive(!MoreInfosPanel.gameObject.activeSelf);
+        StatsInfoPanel.gameObject.SetActive(!StatsInfoPanel.gameObject.activeSelf);
         if(WorldScript.Instance.HighlightPath != null)
         {
             PathStatsPanel.Instance.SetPanel(WorldScript.Instance.HighlightPath);
