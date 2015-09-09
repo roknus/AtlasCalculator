@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-//using UnityEditor;
+using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -30,7 +30,7 @@ public class BuildGraphEditorOnly : MonoBehaviour {
 
 	void OnGUI()
 	{
-        /*
+     
 		if(Application.isPlaying)
 			return;
 
@@ -62,6 +62,6 @@ public class BuildGraphEditorOnly : MonoBehaviour {
 		{
 			//Debug.Log("Right-Click Up");
 		}    
-        */
+        
 	}
 }

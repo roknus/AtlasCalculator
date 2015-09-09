@@ -397,7 +397,7 @@ public class WorldScript : MonoBehaviour
                         case (int)Stat1.Spirit:
                             t = Instantiate(SpiritNode) as Transform;
                             break;
-                        case (int)Stat1.Strenght:
+                        case (int)Stat1.Strength:
                             t = Instantiate(StrenghtNode) as Transform;
                             break;
                         case (int)Stat1.Valor:

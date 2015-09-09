@@ -10,7 +10,7 @@ public enum Stat1
     Valor 		= 3,
     Spirit 		= 4,
     Greatness 	= 5,
-    Strenght 	= 6
+    Strength 	= 6
 }
 
 public class NodeWithOneStat : NodeWithPrestige
@@ -35,7 +35,7 @@ public class NodeWithOneStat : NodeWithPrestige
     public override int GetGreatness() { return (m_Stat1 == Stat1.Greatness) ? value1 : 0; }
     public override int GetMight() { return (m_Stat1 == Stat1.Might) ? value1 : 0; }
     public override int GetStamina() { return (m_Stat1 == Stat1.Stamina) ? value1 : 0; }
-    public override int GetStrength() { return (m_Stat1 == Stat1.Strenght) ? value1 : 0; }
+    public override int GetStrength() { return (m_Stat1 == Stat1.Strength) ? value1 : 0; }
     public override int GetValor() { return (m_Stat1 == Stat1.Valor) ? value1 : 0; }
     public override int GetLuck() { return (m_Stat1 == Stat1.Luck) ? value1 : 0; }
     public override int GetSpirit() { return (m_Stat1 == Stat1.Spirit) ? value1 : 0; }
