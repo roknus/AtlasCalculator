@@ -11,15 +11,19 @@ namespace Serializer
         [XmlElement("TalentName")]
         public string m_TalentName;
 
+        [XmlElement("Talent")]
+        public Symbol m_Talent;
+
         public XMLTalentNode()
         {
 
         }
 
-        public XMLTalentNode(TalentNode node)
+        public XMLTalentNode(CTalentNode node)
             : base(node)
         {
             m_TalentName = node.m_TalentName;
+            m_Talent = node.Talent;
         }
     }
 }

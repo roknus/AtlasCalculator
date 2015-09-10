@@ -36,7 +36,6 @@ public class WorldScript : MonoBehaviour
 
     public  NodePath        m_UnlockedPath;
     public  NodePath        m_UnlockedPath_Simulation;
-    public  Text            ButtonSimulation;
 	private NodePath        m_hightLightPath;
 
     private bool m_IgnorePinkNodes;
@@ -72,7 +71,7 @@ public class WorldScript : MonoBehaviour
 	public static WorldScript Instance { get; private set; }
 
 	void Awake()
-	{
+    {
 		if (Instance != null) 
         {
 			Destroy (gameObject);
@@ -107,23 +106,14 @@ public class WorldScript : MonoBehaviour
         UiManager.Instance.ShowCalculatorUI();
         UiManager.Instance.InitCalculatorUI();
 
+        CTalentNode.Init();
+
         CalculateNodesWeight();
 	}
 
-    void Update()
-    {
-        /*
-        if(Application.isPlaying && !EDITOR_MODE && !ATLAS_INITIALIZED && nodesToBeInstantiated == 0)
-        {
-            ATLAS_INITIALIZED = true;
-            CalculateNodesWeight();
-        }
-         * */
-    }
-
 	IEnumerator LoadAtlasXML()
 	{
-        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas2.xml");	
+        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas3.xml");	
 		
 		yield return ret;
 		
@@ -421,8 +411,16 @@ public class WorldScript : MonoBehaviour
 			else if (n is XMLEtherNode)
 			{
 				t = Instantiate(EtherNode) as Transform;
-			}	
-            t.GetComponent<NodeBase>().Deserialize(n);
+			}
+
+            if (t != null)
+            {
+                t.GetComponent<NodeBase>().Deserialize(n);
+            }
+            else
+            {
+                Debug.Log("Node has not been loaded");
+            }
 		}
         /* Shouldn't work since its in the same frame as init*/
 		InitNodes();

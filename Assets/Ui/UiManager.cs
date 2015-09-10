@@ -25,6 +25,9 @@ public class UiManager : MonoBehaviour
     public RectTransform    StatsInfoPanel;
     public Button           MoreInfosButton;
 
+    public RectTransform    SymbolsPanel;
+    public Button           ShowSymbolsButton;
+
     public Button           SaveButton;
 
     public static UiManager Instance { get; private set; }
@@ -57,6 +60,8 @@ public class UiManager : MonoBehaviour
         ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
 
         MoreInfosButton.onClick.AddListener(() => SwitchMoreInfos());
+
+        ShowSymbolsButton.onClick.AddListener(() => SwitchShowSymbols());
 
         SimulationButton.onClick.AddListener(() => { WorldScript.Instance.SwitchSimulation(); });
 
@@ -103,6 +108,11 @@ public class UiManager : MonoBehaviour
         {
             PathStatsPanel.Instance.SetPanel(WorldScript.Instance.HighlightPath);
         }
+    }
+
+    public void SwitchShowSymbols()
+    {
+        SymbolsPanel.gameObject.SetActive(!SymbolsPanel.gameObject.activeSelf);
     }
 
     public void ShowAlertMessage(string message)

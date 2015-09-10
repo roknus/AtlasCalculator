@@ -11,6 +11,7 @@ public class NodeToolTipScript : MonoBehaviour
 	public Sprite Diamond;
 	public Sprite TransformationSpark;
 
+    public Image NodeIcon;
 	public Text Name;
     public Text Prestige;
 	public Text Stat1;
@@ -44,7 +45,18 @@ public class NodeToolTipScript : MonoBehaviour
 
     public void SetValues(NodeBase _node)
 	{
+        if(_node is CTalentNode)
+        {
+            NodeIcon.gameObject.SetActive(true);
+            NodeIcon.sprite = CTalentNode.SymbolIcon[((CTalentNode)_node).Talent];
+        }
+        else
+        {
+            NodeIcon.gameObject.SetActive(false);
+        }
+
 		Name.text = _node.GetName();
+
 		if(_node is NodeWithPrestige)
 		{
 			Prestige.transform.parent.gameObject.SetActive(true);
