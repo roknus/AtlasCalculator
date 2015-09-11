@@ -28,6 +28,7 @@ public class SymbolShortcut : MonoBehaviour
         {
             Transform t = Instantiate(Button);
             t.GetComponentsInChildren<Image>()[1].sprite = s.Value;
+            t.GetComponentInChildren<Tooltip>().m_Tooltip = CTalentNode.SymbolName[s.Key];
             // Need to make a copy dunno why...
             Symbol symb = s.Key;
             t.GetComponent<Button>().onClick.AddListener(() => ShowSymbols(symb));

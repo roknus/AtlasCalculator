@@ -37,6 +37,7 @@ public class SymbolSubListScript : MonoBehaviour
         {
             Transform o = Instantiate(shortcut);
             o.SetParent(transform);
+            o.GetComponentInChildren<Tooltip>().m_Tooltip = CTalentNode.SymbolName[t.Talent];
             o.GetComponentsInChildren<Image>()[1].sprite = CTalentNode.SymbolIcon[t.Talent];
             Transform tCopy = t.transform;
             o.GetComponent<Button>().onClick.AddListener(() => CameraController.Instance.FocusNode(tCopy));            

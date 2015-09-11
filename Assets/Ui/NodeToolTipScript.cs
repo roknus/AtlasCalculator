@@ -22,6 +22,8 @@ public class NodeToolTipScript : MonoBehaviour
 	public Text CostValue;
 	public Image CostIcon;
 
+    private static Vector3 mouseOffset = new Vector2(5,5);
+
 	public static NodeToolTipScript Instance { get; private set;}
 
 	void Awake()
@@ -38,10 +40,10 @@ public class NodeToolTipScript : MonoBehaviour
 	{
 		gameObject.SetActive(false);	
 	}
-	
-	void Update () {
-	
-	}
+    public void SetAtMousePosition()
+    {
+        transform.position = Input.mousePosition + mouseOffset;
+    }
 
     public void SetValues(NodeBase _node)
 	{

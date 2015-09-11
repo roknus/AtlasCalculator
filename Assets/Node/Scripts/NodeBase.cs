@@ -399,38 +399,54 @@ public abstract class NodeBase : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (WorldScript.Instance.SimulationMode)
+        // Do not hover UI
+        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
-            if (bUnlocked) 
-                return;
-            if (bSimulationUnlock) LockSimulationNode();
-            else UnlockSimulationNode();
+            if (WorldScript.Instance.SimulationMode)
+            {
+                if (bUnlocked)
+                    return;
+                if (bSimulationUnlock) LockSimulationNode();
+                else UnlockSimulationNode();
 
-            PathCostPanel.Instance.SetPanel(WorldScript.Instance.m_UnlockedPath_Simulation);
-        }
-        else
-        {
-            if (bUnlocked) LockNode();
-            else UnlockNode();
+                PathCostPanel.Instance.SetPanel(WorldScript.Instance.m_UnlockedPath_Simulation);
+            }
+            else
+            {
+                if (bUnlocked) LockNode();
+                else UnlockNode();
 
-			WorldScript.Instance.CalculateNodesWeight();
+                WorldScript.Instance.CalculateNodesWeight();
+            }
         }
     }
 
     void OnMouseEnter()
     {
-		NodeToolTipScript.Instance.gameObject.SetActive(true);
-		NodeToolTipScript.Instance.SetValues(this);
+        // Do not hover UI
+        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            NodeToolTipScript.Instance.gameObject.SetActive(true);
+            NodeToolTipScript.Instance.SetValues(this);
+        }
     }
 
     void OnMouseOver()
     {
-		NodeToolTipScript.Instance.transform.position = Input.mousePosition;
+        // Do not hover UI
+        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            NodeToolTipScript.Instance.SetAtMousePosition();
+        }
     }
 
     void OnMouseExit()
     {
-		NodeToolTipScript.Instance.gameObject.SetActive(false);
+        // Do not hover UI
+        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            NodeToolTipScript.Instance.gameObject.SetActive(false);
+        }
     }
 }
 

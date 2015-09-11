@@ -22,7 +22,8 @@ public class CameraController : MonoBehaviour
         get { return m_ZDistance; }
         set { m_ZDistance = Mathf.Clamp(value, MIN_CAMERA_DIST, MAX_CAMERA_DIST); }
     }
-    private bool    bSmoothZoomCoroutine;
+    private bool bSmoothZoomCoroutine;
+    private bool bSmoothFocusCoroutine;
 
 	public static CameraController Instance { get; private set; }
 
@@ -41,8 +42,8 @@ public class CameraController : MonoBehaviour
 
 	void Update () 
 	{
-        // Left click or middle click
-		if (Input.GetMouseButton (0) || Input.GetMouseButton(2)) 
+        // Left click or middle click but not hover UI
+		if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject() && (Input.GetMouseButton (0) || Input.GetMouseButton(2))) 
 		{
 			float h = XSpeed * -Input.GetAxis("Mouse X");
 			float v = YSpeed * -Input.GetAxis("Mouse Y");
@@ -97,9 +98,31 @@ public class CameraController : MonoBehaviour
     {
         Screen.fullScreen = !Screen.fullScreen;
     }
+
+    IEnumerator SmoothFocus(Vector3 _dest)
+    {
+        if(!bSmoothFocusCoroutine)
+        {
+            bSmoothFocusCoroutine = true;
+            while (Vector3.Distance(transform.position, _dest) > 5.0f)
+            {
+                Vector3 dir = (_dest - transform.position);
+                dir.Normalize();
+                transform.Translate(dir * 0.7f);
+
+                yield return null;
+            }
+            bSmoothFocusCoroutine = false;
+        }
+    }
 		
 	public void FocusNode(Transform node)
 	{
-		transform.position = new Vector3 (node.position.x, 20, node.position.z - 12);
+        //Vector3 temp = transform.position;
+        transform.position = new Vector3(node.position.x, 0, node.position.z);
+        transform.Translate(new Vector3(0, 0, -ZDistance), Space.Self);
+        /*Vector3 dest = transform.position;
+        transform.position = temp;
+        StartCoroutine(SmoothFocus(dest));*/
 	}
 }
