@@ -63,16 +63,16 @@ public class NodePath
             Path.Add(_n);
             if (!_n.bUnlocked)
             {
-                Cost += _n.GetCost();
-                Proficency += _n.GetProficency();
-                Greatness  += _n.GetGreatness();
-                Might += _n.GetMight();
-                Stamina += _n.GetStamina();
-                Strength += _n.GetStrength();
-                Valor += _n.GetValor();
-                Luck += _n.GetLuck();
-                Spirit += _n.GetSpirit();
-                Prestige += _n.GetPrestige();
+                Cost        += _n.GetCost();
+                Proficency  += _n.GetProficency();
+                Greatness   += _n.GetGreatness();
+                Might       += _n.GetMight();
+                Stamina     += _n.GetStamina();
+                Strength    += _n.GetStrength();
+                Valor       += _n.GetValor();
+                Luck        += _n.GetLuck();
+                Spirit      += _n.GetSpirit();
+                Prestige    += _n.GetPrestige();
             }
 		}
     }
@@ -83,16 +83,16 @@ public class NodePath
         {
             Path.Remove(_n);
 
-            Cost -= _n.GetCost();
-            Proficency -= _n.GetProficency();
-            Greatness -= _n.GetGreatness();
-            Might -= _n.GetMight();
-            Stamina -= _n.GetStamina();
-            Strength -= _n.GetStrength();
-            Valor -= _n.GetValor();
-            Luck -= _n.GetLuck();
-            Spirit -= _n.GetSpirit();
-            Prestige -= _n.GetPrestige();
+            Cost        -= _n.GetCost();
+            Proficency  -= _n.GetProficency();
+            Greatness   -= _n.GetGreatness();
+            Might       -= _n.GetMight();
+            Stamina     -= _n.GetStamina();
+            Strength    -= _n.GetStrength();
+            Valor       -= _n.GetValor();
+            Luck        -= _n.GetLuck();
+            Spirit      -= _n.GetSpirit();
+            Prestige    -= _n.GetPrestige();
         }
     }
 

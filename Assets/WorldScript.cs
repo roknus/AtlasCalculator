@@ -15,8 +15,6 @@ public class WorldScript : MonoBehaviour
 	public bool EDITOR_MODE;
 	public bool ATLAS_INITIALIZED;
 
-	public bool SimulationMode;
-
     public Transform ClassNode;
     public Transform EtherNode;
     public Transform GodForm;
@@ -35,7 +33,22 @@ public class WorldScript : MonoBehaviour
 	public Dictionary<int, Transform>  m_nodes;
 
     public  NodePath        m_UnlockedPath;
-    public  NodePath        m_UnlockedPath_Simulation;
+    private NodePath        m_UnlockedPath_Simulation;
+    public  NodePath        UnlockedPath_Simulation 
+    {
+        get
+        {
+            return m_UnlockedPath_Simulation;
+        }
+        set
+        {
+            if (value != null)
+            {
+                m_UnlockedPath_Simulation = value;
+                PathCostPanel.Instance.SetPanel(m_UnlockedPath_Simulation);
+            }
+        }
+    }
 	private NodePath        m_hightLightPath;
 
     private bool m_IgnorePinkNodes;
@@ -55,10 +68,12 @@ public class WorldScript : MonoBehaviour
 				m_hightLightPath = value;
 	            PathCostPanel.Instance.gameObject.SetActive(true);
                 PathCostPanel.Instance.SetPanel(m_hightLightPath);
+                /*
                 if (PathStatsPanel.Instance != null)
                 {
                     PathStatsPanel.Instance.SetPanel(m_hightLightPath);
                 }
+                 * */
 	            foreach (NodeBase n in m_hightLightPath.Path)
 	            {
 					n.HighLight = true;
@@ -82,8 +97,6 @@ public class WorldScript : MonoBehaviour
 			Instance = this;
 		}
 
-		SimulationMode = false;
-		m_UnlockedPath_Simulation = new NodePath ();
 		m_nodes = new Dictionary<int, Transform>();
 
 		if (EDITOR_MODE && !Application.isPlaying && !ATLAS_INITIALIZED) {
@@ -120,7 +133,9 @@ public class WorldScript : MonoBehaviour
 		// check for errors
 		if (!string.IsNullOrEmpty(ret.error)) {
 			Debug.Log ("WWW error : " + ret.error);
-		} else {			
+		} 
+        else 
+        {
 			XMLAtlasGraph = ret.text;
 			LoadXML ();
 
@@ -131,6 +146,7 @@ public class WorldScript : MonoBehaviour
             else if (User.Instance.Connected)
             {
                 User.Instance.StartLoadUserXML();
+                SimulationScript.Instance.LoadXML();
 			}
             else
             {
@@ -142,15 +158,29 @@ public class WorldScript : MonoBehaviour
 
 	IEnumerator SendUserGraph(StringWriter _data)
 	{		
-		WWWForm form = new WWWForm ();
-		form.AddField ("xml", _data.ToString());
-        WWW www = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/save_user_graph.php", form);	
-		
-		yield return www;
+        yield return StartCoroutine(User.Instance.Reconnect());
+        if (!User.Instance.Connected)
+        {
+            UiManager.Instance.ShowAlertMessage("An error occured when reconnecting to the server. Please retry or refresh your page.");
+        }
+        else
+        {
+            WWWForm form = new WWWForm();
+            form.AddField("xml", _data.ToString());
+            WWW www = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/save_user_graph.php", form);
 
-		if (www.error != null) {
-			Debug.Log (www.error);
-		}
+            yield return www;
+
+            if (www.error != null)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                UiManager.Instance.ShowAlertMessage("Your atlas has been saved successfully");
+            }
+        }
+        UiManager.Instance.ResetSaveButton();
 	}
 
 	public void InitNodes()
@@ -307,26 +337,6 @@ public class WorldScript : MonoBehaviour
             SaveUserGraph();
     }
 
-    public void SwitchSimulation()
-    {
-		SimulationMode = !SimulationMode;
-
-        if(!SimulationMode)
-        {
-            PathCostPanel.Instance.Clean();
-            foreach(Transform n in m_nodes.Values)
-            {
-                n.GetComponent<NodeBase>().bSimulationUnlock = false;
-            }
-            UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (OFF)";
-        }
-        else
-        {
-            m_UnlockedPath_Simulation = new NodePath();
-            UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (ON)";
-        }
-    }
-
 	public void SaveXML()
 	{
 		var serializer = new XmlSerializer(typeof(NodeSerializer));
@@ -445,6 +455,7 @@ public class WorldScript : MonoBehaviour
 				nodeSerializer.Add(t.GetComponent<NodeBase>());
 		}
 		serializer.Serialize(stream, nodeSerializer);
+
 		StartCoroutine("SendUserGraph", stream);
 
 		Debug.Log("Serialization of user graph Done !");

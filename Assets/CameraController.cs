@@ -7,9 +7,9 @@ public class CameraController : MonoBehaviour
     private const int MAX_CAMERA_DIST   = 70;
 
     private const int MIN_X_CAMERA = -300;
-    private const int MAX_X_CAMERA = 350;
+    private const int MAX_X_CAMERA = 400;
 
-    private const int MIN_Z_CAMERA = -150;
+    private const int MIN_Z_CAMERA = -190;
     private const int MAX_Z_CAMERA = 130;
 
 	public float    XSpeed;

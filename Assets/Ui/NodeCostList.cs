@@ -62,7 +62,11 @@ public class NodeCostList : MonoBehaviour {
                 NodeWithOneStat node = nodebase as NodeWithOneStat;
                 if (node.m_Stat1 == Stat1.Greatness)
                 {
-                    res.Add(new KeyValuePair<int, NodePath>(i, node.FindCheapestPath()));
+                    NodePath path = node.FindCheapestPath();
+                    if(path != null)
+                    {
+                        res.Add(new KeyValuePair<int, NodePath>(i, path));
+                    }
                 }
             }
         }

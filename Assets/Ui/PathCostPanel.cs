@@ -29,14 +29,11 @@ public class PathCostPanel : MonoBehaviour {
 			Instance = this;
 		}
 	}
-	
-	void Update () 
-    {
-	
-	}
 
     public void SetPanel(NodePath path)
     {
+        if (path == null) return;
+
         Red.text        = path.Red.ToString();
         Green.text      = path.Green.ToString();
         Blue.text       = path.Blue.ToString();
@@ -44,6 +41,8 @@ public class PathCostPanel : MonoBehaviour {
         Proficency.text = path.Proficency.ToString();
 		Purple.text 	= path.PurpleSparks.ToString ();
         Greatness.text  = path.Greatness.ToString();
+
+        PathStatsPanel.Instance.SetPanel(path);
     }
 
     public void Clean()
@@ -55,5 +54,7 @@ public class PathCostPanel : MonoBehaviour {
         Purple.text = "0";
         Proficency.text = "0";
         Greatness.text = "0";
+
+        PathStatsPanel.Instance.Clean();
     }
 }

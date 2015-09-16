@@ -27,11 +27,11 @@ public class PathStatsPanel : MonoBehaviour
 			Instance = this;
 		}
 	}
-	
-	void Update () 
+
+    void Start()
     {
-	
-	}
+        UiManager.Instance.SwitchMoreInfos();
+    }
 
     public void SetPanel(NodePath path)
     {

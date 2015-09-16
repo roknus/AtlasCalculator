@@ -1,6 +1,7 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class UiManager : MonoBehaviour 
 {
@@ -28,7 +29,15 @@ public class UiManager : MonoBehaviour
     public RectTransform    SymbolsPanel;
     public Button           ShowSymbolsButton;
 
+    public RectTransform    SimulationPanel;
+    public Button           ShowSimulationButton;
+
+    public Button           SaveSimulationButton;
+    public Button           LoadSimulationButton;
+
     public Button           SaveButton;
+
+    public RectTransform    FPSCounter;
 
     public static UiManager Instance { get; private set; }
 
@@ -46,13 +55,23 @@ public class UiManager : MonoBehaviour
         }
 	}
 
+    public void Update()
+    {
+        if(Input.GetKeyUp(KeyCode.F))
+        {
+            SwitchFPSCounter();
+        }
+    }
+
     public void InitCalculatorUI()
     {
-        SaveButton.onClick.AddListener(() => WorldScript.Instance.SaveAtlas());
+        SaveButton.onClick.AddListener(() => Save());
         if (!WorldScript.Instance.EDITOR_MODE && (User.Instance == null || !User.Instance.Connected))
         {
             SaveButton.gameObject.SetActive(false);
-        }
+            UiManager.Instance.SaveSimulationButton.gameObject.SetActive(false);
+            UiManager.Instance.LoadSimulationButton.gameObject.SetActive(false);
+        }                                           
 
         ButtonProficency.onClick.AddListener(() => { OpenProficencyWindow(); });
         ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
@@ -63,7 +82,9 @@ public class UiManager : MonoBehaviour
 
         ShowSymbolsButton.onClick.AddListener(() => SwitchShowSymbols());
 
-        SimulationButton.onClick.AddListener(() => { WorldScript.Instance.SwitchSimulation(); });
+        ShowSimulationButton.onClick.AddListener(() => SwitchSimulation());
+
+        SimulationButton.onClick.AddListener(() => { SimulationScript.Instance.SwitchSimulation(); });
 
         IgnorePinkNodes.onValueChanged.AddListener((b) => WorldScript.Instance.SwitchIgnorePinkNodes(b));
         
@@ -104,15 +125,22 @@ public class UiManager : MonoBehaviour
     public void SwitchMoreInfos()
     {
         StatsInfoPanel.gameObject.SetActive(!StatsInfoPanel.gameObject.activeSelf);
+        /*
         if(WorldScript.Instance.HighlightPath != null)
         {
             PathStatsPanel.Instance.SetPanel(WorldScript.Instance.HighlightPath);
         }
+         * */
     }
 
     public void SwitchShowSymbols()
     {
         SymbolsPanel.gameObject.SetActive(!SymbolsPanel.gameObject.activeSelf);
+    }
+
+    public void SwitchSimulation()
+    {
+        SimulationPanel.gameObject.SetActive(!SimulationPanel.gameObject.activeSelf);
     }
 
     public void ShowAlertMessage(string message)
@@ -144,5 +172,23 @@ public class UiManager : MonoBehaviour
     {
         MainMenu.gameObject.SetActive(false);
         Calculateur.gameObject.SetActive(true);
+    }
+
+    public void Save()
+    {
+        SaveButton.GetComponentInChildren<Text>().text = "Saving...";
+        SaveButton.enabled = false;
+        WorldScript.Instance.SaveAtlas();
+    }
+
+    public void ResetSaveButton()
+    {
+        SaveButton.GetComponentInChildren<Text>().text = "Save Atlas";
+        SaveButton.enabled = true;
+    }
+
+    public void SwitchFPSCounter()
+    {
+        FPSCounter.gameObject.SetActive(!FPSCounter.gameObject.activeSelf);
     }
 }

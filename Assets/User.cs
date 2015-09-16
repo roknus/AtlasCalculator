@@ -69,6 +69,58 @@ public class User : MonoBehaviour
         }
     }
 
+    public IEnumerator Reconnect()
+    {
+        if (Username == null || Password == null)
+        {
+            UiManager.Instance.ShowAlertMessage("Error, need to reconnect");
+            Debug.Log("Error, need to reconnect");
+            yield break;
+        }
+
+        if (!bTryingToConnect)
+        {
+            bTryingToConnect = true;
+            WWW www = new WWW("http://" + ServerHostname + "/atlas/isConnected.php");
+
+            yield return www;
+
+            bTryingToConnect = false;
+
+            if (www.text == "true")
+            {
+                // OK !
+                yield break;
+            }
+            else
+            {
+                // Reconnect
+                if (!bTryingToConnect)
+                {
+                    bTryingToConnect = true;
+                    WWWForm form = new WWWForm();
+                    form.AddField("username", Username.text);
+                    form.AddField("password", Password.text);
+
+                    WWW www2 = new WWW("http://" + ServerHostname + "/atlas/connect.php", form);
+
+                    yield return www2;
+
+                    bTryingToConnect = false;
+                    /*
+                    if (www2.text == "success")
+                    {
+                        UiManager.Instance.ShowAlertMessage("reconnected");
+                    }
+                    else
+                    {
+                        UiManager.Instance.ShowAlertMessage("error");
+                    }*/
+                }
+            }
+        }
+    }
+
     public void StartLoadUserXML()
     { 
         StartCoroutine("LoadUserXML", "http://" + ServerHostname + "/atlas/AtlasCalculator/get_user_graph.php");

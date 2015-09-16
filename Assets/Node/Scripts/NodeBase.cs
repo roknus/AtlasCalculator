@@ -54,12 +54,12 @@ public abstract class NodeBase : MonoBehaviour
             {
                 if (m_bSimulationUnlock) return; // Prevent bug that add node cost even if its already unlocked
 
-                WorldScript.Instance.m_UnlockedPath_Simulation.Add(this);
+                WorldScript.Instance.UnlockedPath_Simulation.Add(this);
                 m_SpriteRenderer.color = Color.red;
             }
             else
             {
-				WorldScript.Instance.m_UnlockedPath_Simulation.Remove(this);
+				WorldScript.Instance.UnlockedPath_Simulation.Remove(this);
 				if(bUnlocked)
 				{
 					m_SpriteRenderer.color = EdgeScript.gold;
@@ -353,7 +353,15 @@ public abstract class NodeBase : MonoBehaviour
 
 	public void FindAndHighlightCheapestPath()
     {		
-        WorldScript.Instance.HighlightPath = FindCheapestPath();
+        NodePath path = FindCheapestPath();
+        if (path == null)
+        {
+            UiManager.Instance.ShowAlertMessage("Couldn't find any path without pink nodes");
+        }
+        else
+        {
+            WorldScript.Instance.HighlightPath = path;
+        }
 	}
 
     public NodePath FindCheapestPath()
@@ -367,7 +375,6 @@ public abstract class NodeBase : MonoBehaviour
             // Node is unreachable because of ignore pink node
             if (curr.m_weightCost == int.MaxValue)
             {
-                UiManager.Instance.ShowAlertMessage("Couldn't find any path without pink nodes");
                 return null;
             }
             foreach (NodeBase n in curr.m_neighborsInfo)
@@ -402,14 +409,14 @@ public abstract class NodeBase : MonoBehaviour
         // Do not hover UI
         if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
-            if (WorldScript.Instance.SimulationMode)
+            if (SimulationScript.Instance.SimulationMode)
             {
                 if (bUnlocked)
                     return;
                 if (bSimulationUnlock) LockSimulationNode();
                 else UnlockSimulationNode();
 
-                PathCostPanel.Instance.SetPanel(WorldScript.Instance.m_UnlockedPath_Simulation);
+                PathCostPanel.Instance.SetPanel(WorldScript.Instance.UnlockedPath_Simulation);
             }
             else
             {
@@ -442,11 +449,7 @@ public abstract class NodeBase : MonoBehaviour
 
     void OnMouseExit()
     {
-        // Do not hover UI
-        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-        {
-            NodeToolTipScript.Instance.gameObject.SetActive(false);
-        }
+        NodeToolTipScript.Instance.gameObject.SetActive(false);
     }
 }
 
