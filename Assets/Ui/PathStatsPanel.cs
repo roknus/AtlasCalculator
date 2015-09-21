@@ -13,24 +13,9 @@ public class PathStatsPanel : MonoBehaviour
     public Text Spirit;
     public Text Prestige;
 
-	public static PathStatsPanel Instance { get; private set; }
-
-	void Awake () 
-    {		
-		if (Instance != null) 
-		{
-			Destroy (gameObject);
-			return;
-		}
-		else
-		{
-			Instance = this;
-		}
-	}
-
     void Start()
     {
-        UiManager.Instance.SwitchMoreInfos();
+        gameObject.SetActive(false);
     }
 
     public void SetPanel(NodePath path)

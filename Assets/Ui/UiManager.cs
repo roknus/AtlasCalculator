@@ -10,12 +10,15 @@ public class UiManager : MonoBehaviour
     public Image            ForeGroundPanel;
 
     public RectTransform    ProficencyWindow;
+
     public RectTransform    GreatnessNodeList;
+
     public AlertMessage     AlertMessage;
+
     public Button           ButtonGreatness;
+
     public Button           ButtonProficency;
     public Text             ButtonProficencyText { get; set; }
-    public Button           SimulationButton;
 
     public RectTransform    RightClickPanel;
     public Button           FindShortestPathButton;
@@ -23,7 +26,12 @@ public class UiManager : MonoBehaviour
 
     public Toggle           IgnorePinkNodes;
 
-    public RectTransform    StatsInfoPanel;
+    public PathCostPanel    CostInfoPanel_Simulated;
+    public PathStatsPanel   StatsInfoPanel_Simulated;
+    public Button           ResetPathInfo_Simulated;
+    public PathCostPanel    CostInfoPanel_Calculated;
+    public PathStatsPanel   StatsInfoPanel_Calculated;
+    public Button           ResetPathInfo_Calculated;
     public Button           MoreInfosButton;
 
     public RectTransform    SymbolsPanel;
@@ -31,7 +39,7 @@ public class UiManager : MonoBehaviour
 
     public RectTransform    SimulationPanel;
     public Button           ShowSimulationButton;
-
+    public Button           SimulationButton;
     public Button           SaveSimulationButton;
     public Button           LoadSimulationButton;
 
@@ -77,8 +85,11 @@ public class UiManager : MonoBehaviour
         ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
 
         ButtonGreatness.onClick.AddListener(() => { EnableGreatnessNodeList(); });
+        GreatnessNodeList.gameObject.SetActive(false);
 
         MoreInfosButton.onClick.AddListener(() => SwitchMoreInfos());
+        ResetPathInfo_Simulated.onClick.AddListener(() => WorldScript.Instance.ResetPath(true));
+        ResetPathInfo_Calculated.onClick.AddListener(() => WorldScript.Instance.ResetPath());
 
         ShowSymbolsButton.onClick.AddListener(() => SwitchShowSymbols());
 
@@ -87,8 +98,6 @@ public class UiManager : MonoBehaviour
         SimulationButton.onClick.AddListener(() => { SimulationScript.Instance.SwitchSimulation(); });
 
         IgnorePinkNodes.onValueChanged.AddListener((b) => WorldScript.Instance.SwitchIgnorePinkNodes(b));
-        
-        GreatnessNodeList.gameObject.SetActive(false);
     }
 
     public void EnableForeGround()  { ForeGroundPanel.enabled = true; }
@@ -124,13 +133,8 @@ public class UiManager : MonoBehaviour
 
     public void SwitchMoreInfos()
     {
-        StatsInfoPanel.gameObject.SetActive(!StatsInfoPanel.gameObject.activeSelf);
-        /*
-        if(WorldScript.Instance.HighlightPath != null)
-        {
-            PathStatsPanel.Instance.SetPanel(WorldScript.Instance.HighlightPath);
-        }
-         * */
+        StatsInfoPanel_Simulated.gameObject.SetActive(!StatsInfoPanel_Simulated.gameObject.activeSelf);
+        StatsInfoPanel_Calculated.gameObject.SetActive(!StatsInfoPanel_Calculated.gameObject.activeSelf);
     }
 
     public void SwitchShowSymbols()

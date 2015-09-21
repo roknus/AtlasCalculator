@@ -36,7 +36,8 @@ public class SimulationScript : MonoBehaviour
         UiManager.Instance.SaveSimulationButton.onClick.AddListener(() => Save());
         UiManager.Instance.LoadSimulationButton.onClick.AddListener(() => Load());
 
-        WorldScript.Instance.UnlockedPath_Simulation = new NodePath();
+        WorldScript.Instance.UnlockedPath_Simulation = new NodePath(true);
+        UiManager.Instance.CostInfoPanel_Simulated.transform.parent.parent.gameObject.SetActive(false);
     }
 
     public void Save()
@@ -116,7 +117,7 @@ public class SimulationScript : MonoBehaviour
             string data = www.text;
             if (!(data == "fail"))
             {
-                Simulation_1 = new NodePath();
+                Simulation_1 = new NodePath(true);
 
                 var serializer = new XmlSerializer(typeof(UserNodeSerializer));
                 UserNodeSerializer nodeSerializer;
@@ -149,7 +150,7 @@ public class SimulationScript : MonoBehaviour
             SetSimulation(true);
             foreach (NodeBase n in Simulation_1.Path)
             {
-                n.UnlockSimulationNode();
+                n.TryUnlockSimulationNode();
             }
             WorldScript.Instance.UnlockedPath_Simulation = Simulation_1;
         }
@@ -158,6 +159,7 @@ public class SimulationScript : MonoBehaviour
     public void SwitchSimulation()
     {
         SetSimulation(!SimulationMode);
+        WorldScript.Instance.ResetPath();
     }
 
     public void SetSimulation(bool _b)
@@ -165,21 +167,23 @@ public class SimulationScript : MonoBehaviour
         SimulationMode = _b;
 
         // Fix Bug : Need it even for disable because bSimulationUnlock = false remove the node from the simulation saved by the user
-        WorldScript.Instance.UnlockedPath_Simulation = new NodePath();
+        WorldScript.Instance.UnlockedPath_Simulation = new NodePath(true);
         if (!SimulationMode)
         {
-            PathCostPanel.Instance.Clean();
+            UiManager.Instance.CostInfoPanel_Simulated.Clean();
             foreach (Transform n in WorldScript.Instance.m_nodes.Values)
             {
                 n.GetComponent<NodeBase>().bSimulationUnlock = false;
             }
             UiManager.Instance.SaveSimulationButton.interactable = false;
             UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (OFF)";
+            UiManager.Instance.CostInfoPanel_Simulated.transform.parent.parent.gameObject.SetActive(false);
         }
         else
         {
             UiManager.Instance.SaveSimulationButton.interactable = true;
             UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (ON)";
+            UiManager.Instance.CostInfoPanel_Simulated.transform.parent.parent.gameObject.SetActive(true);
         }
     }
 }

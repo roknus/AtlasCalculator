@@ -41,10 +41,19 @@ public class EdgeScript : MonoBehaviour {
 
 		if ((Node1.GetComponent<NodeBase>().HighLight && Node2.GetComponent<NodeBase>().HighLight) ||
 		    (Node1.GetComponent<NodeBase>().bUnlocked && Node2.GetComponent<NodeBase>().HighLight) ||
-		    (Node1.GetComponent<NodeBase>().HighLight && Node2.GetComponent<NodeBase>().bUnlocked))
+            (Node1.GetComponent<NodeBase>().HighLight && Node2.GetComponent<NodeBase>().bUnlocked) ||
+            (Node1.GetComponent<NodeBase>().bSimulationUnlock && Node2.GetComponent<NodeBase>().HighLight) ||
+            (Node1.GetComponent<NodeBase>().HighLight && Node2.GetComponent<NodeBase>().bSimulationUnlock))
         {
             m_Color1 = Color.green;
             m_Color2 = Color.green;
+            m_lineRenderer.SetWidth(0.6f, 0.6f);
+        }
+
+        if (Node1.GetComponent<NodeBase>().bUnlocked && Node2.GetComponent<NodeBase>().bUnlocked)
+        {
+            m_Color1 = gold;
+            m_Color2 = gold;
             m_lineRenderer.SetWidth(0.6f, 0.6f);
         }
 
@@ -54,13 +63,6 @@ public class EdgeScript : MonoBehaviour {
         {
             m_Color1 = Color.red;
             m_Color2 = Color.red;
-            m_lineRenderer.SetWidth(0.6f, 0.6f);
-        }
-
-        if (Node1.GetComponent<NodeBase>().bUnlocked && Node2.GetComponent<NodeBase>().bUnlocked)
-        {
-            m_Color1 = gold;
-            m_Color2 = gold;
             m_lineRenderer.SetWidth(0.6f, 0.6f);
         }
 

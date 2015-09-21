@@ -45,7 +45,7 @@ public class WorldScript : MonoBehaviour
             if (value != null)
             {
                 m_UnlockedPath_Simulation = value;
-                PathCostPanel.Instance.SetPanel(m_UnlockedPath_Simulation);
+                UiManager.Instance.CostInfoPanel_Simulated.SetPanel(m_UnlockedPath_Simulation);
             }
         }
     }
@@ -66,14 +66,8 @@ public class WorldScript : MonoBehaviour
 			if(value != null)
 			{
 				m_hightLightPath = value;
-	            PathCostPanel.Instance.gameObject.SetActive(true);
-                PathCostPanel.Instance.SetPanel(m_hightLightPath);
-                /*
-                if (PathStatsPanel.Instance != null)
-                {
-                    PathStatsPanel.Instance.SetPanel(m_hightLightPath);
-                }
-                 * */
+                UiManager.Instance.CostInfoPanel_Calculated.gameObject.SetActive(true);
+                UiManager.Instance.CostInfoPanel_Calculated.SetPanel(m_hightLightPath);
 	            foreach (NodeBase n in m_hightLightPath.Path)
 	            {
 					n.HighLight = true;
@@ -126,7 +120,7 @@ public class WorldScript : MonoBehaviour
 
 	IEnumerator LoadAtlasXML()
 	{
-        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas3.xml");	
+        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas.xml");	
 		
 		yield return ret;
 		
@@ -206,7 +200,7 @@ public class WorldScript : MonoBehaviour
 		foreach (Transform c in transform)
 		{
 			NodeBase n = c.GetComponent<NodeBase>();
-			if(n.bUnlocked)
+			if(n.bUnlocked || n.bSimulationUnlock)
 			{
 				m_UnlockedPath.Add(n);
 				n.m_weight = 0;
@@ -219,6 +213,19 @@ public class WorldScript : MonoBehaviour
 			} 
 		}
 	}	
+
+    /*
+     * Simulated, 1 = Calculated
+     */
+    public void ResetPath(bool simulation = false)
+    {
+        if (simulation)
+        {
+            SimulationScript.Instance.SwitchSimulation();
+            SimulationScript.Instance.SwitchSimulation();
+        }
+        HighlightPath = null;
+    }
 
     public void SwitchIgnorePinkNodes(bool _b)
     {
@@ -258,6 +265,38 @@ public class WorldScript : MonoBehaviour
 				}
 			}
 		}
+        if (SimulationScript.Instance && SimulationScript.Instance.SimulationMode)
+        {
+            foreach (NodeBase n in UnlockedPath_Simulation.Path)
+            {
+                foreach (NodeBase neigh in n.m_neighborsInfo)
+                {
+                    // Avoid pink nodes
+                    if (WorldScript.Instance.IgnorePinkNodes && neigh is NodeWithCost)
+                    {
+                        NodeWithCost nc = neigh as NodeWithCost;
+                        if (nc.m_CostType == CostType.PinkSparks)
+                        {
+                            continue;
+                        }
+                    }
+
+                    // If the neighbors has lower cost by passing by this node, update it
+                    if (neigh.m_weight > n.m_weight + 1)
+                    {
+                        neigh.m_weight = 1;
+                        CalculateWeightRecc(neigh);
+                    }
+                    int cost = neigh.GetCost().Tot;
+                    if (neigh.m_weightCost > n.m_weightCost + cost)
+                    {
+                        neigh.m_weightCost = cost;
+                        CalculateWeightCostRecc(neigh);
+                    }
+                }
+            }
+
+        }
 	}
 	
 	public void CalculateWeightRecc(NodeBase n)
@@ -321,7 +360,7 @@ public class WorldScript : MonoBehaviour
 	
 	public void CleanHighlight()
     {
-        PathCostPanel.Instance.gameObject.SetActive(false);
+        UiManager.Instance.CostInfoPanel_Calculated.Clean();
 		if(m_hightLightPath != null)
             foreach (NodeBase n in m_hightLightPath.Path)
             {
@@ -552,6 +591,8 @@ public class WorldScript : MonoBehaviour
 			HighlightPath = bestPath;
 		}
 
+        UiManager.Instance.ButtonProficency.onClick.RemoveAllListeners();
+        UiManager.Instance.ButtonProficency.onClick.AddListener(() => { UiManager.Instance.OpenProficencyWindow(); });
         UiManager.Instance.ButtonProficencyText.text = "Optimize Proficency";
 	}
 	
@@ -693,6 +734,8 @@ public class WorldScript : MonoBehaviour
             HighlightPath = bestPath;
         }
 
+        UiManager.Instance.ButtonProficency.onClick.RemoveAllListeners();
+        UiManager.Instance.ButtonProficency.onClick.AddListener(() => { UiManager.Instance.OpenProficencyWindow(); });
         UiManager.Instance.ButtonProficencyText.text = "Optimize Proficency";
     }
     

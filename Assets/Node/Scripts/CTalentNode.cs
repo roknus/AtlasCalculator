@@ -40,7 +40,9 @@ public enum Symbol
     ConsumablesEfficiency = 32,
     RechargingConsumables = 33,
     TacticalDefense = 34,
-    RapidAttack = 35
+    RapidAttack = 35,
+    CompressiveTraume = 36,
+    DeepDissection = 37
 }
 
 public class CTalentNode : NodeWithPrestige 
@@ -190,13 +192,21 @@ public class CTalentNode : NodeWithPrestige
         SymbolIcon.Add(Symbol.ConsumablesEfficiency, Resources.Load<Sprite>("Symbols/Consumables_Efficiency_Icon"));
         SymbolDesctription.Add(Symbol.ConsumablesEfficiency, "Duration of the positive effects of consumables is increased by 12/24%. Amount of health restored by consumables is increased by 12/24%. Damage dealt is increased by 12/24%. ");
 
-        SymbolName.Add(Symbol.RechargingConsumables, "Recharging Consumables");
+        SymbolName.Add(Symbol.RechargingConsumables, "Red Alert");
         SymbolIcon.Add(Symbol.RechargingConsumables, Resources.Load<Sprite>("Symbols/Recharging_Consumables_Icon"));
         SymbolDesctription.Add(Symbol.RechargingConsumables, "Combat consumables are restored 15/30% faster. ");
 
         SymbolName.Add(Symbol.TacticalDefense, "Tactical Defense");
         SymbolIcon.Add(Symbol.TacticalDefense, Resources.Load<Sprite>("Symbols/Tactical_Defense_Icon"));
         SymbolDesctription.Add(Symbol.TacticalDefense, "Melee and Ranged defense is increased by 5% for each level of this symbol. ");
+
+        SymbolName.Add(Symbol.CompressiveTraume, "Compressive Traume");
+        SymbolIcon.Add(Symbol.CompressiveTraume, Resources.Load<Sprite>("Symbols/Compressive_Trauma_Icon"));
+        SymbolDesctription.Add(Symbol.CompressiveTraume, "When you inflict maximum bonus damage to the enemy, they have an effect applied the them that inflicts damage over time. Total damage inflicted equals 140% of the character's Strength.");
+
+        SymbolName.Add(Symbol.DeepDissection, "Deep Dissection");
+        SymbolIcon.Add(Symbol.DeepDissection, Resources.Load<Sprite>("Symbols/Deep_Dissection_Icon"));
+        SymbolDesctription.Add(Symbol.DeepDissection, "When you inflict maximum bonus damage to the enemy, they have an effect applied the them that inflicts damage over time. Total damage inflicted equals 100% of the character's Valor.");
 
         isInit = true;
     }

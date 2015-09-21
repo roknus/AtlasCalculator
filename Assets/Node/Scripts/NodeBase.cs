@@ -20,19 +20,18 @@ public abstract class NodeBase : MonoBehaviour
 			return m_highLight;
 		}
 		set
-		{
-			
+		{			
 			if(bUnlocked)
 			{
 				m_SpriteRenderer.color = EdgeScript.gold;
-			}
+            }
+            else if (bSimulationUnlock)
+            {
+                m_SpriteRenderer.color = Color.red;
+            }
 			else if(value)
 			{
 				m_SpriteRenderer.color = Color.green;
-			}
-			else if(bSimulationUnlock)
-			{
-				m_SpriteRenderer.color = Color.red;				
 			}
 			else
 			{
@@ -46,20 +45,19 @@ public abstract class NodeBase : MonoBehaviour
     {
         get
         {
-			return (m_Origin || m_bSimulationUnlock);
+			return (m_bSimulationUnlock);
 		}
 		set
         {
             if (value)
             {
-                if (m_bSimulationUnlock) return; // Prevent bug that add node cost even if its already unlocked
-
-                WorldScript.Instance.UnlockedPath_Simulation.Add(this);
                 m_SpriteRenderer.color = Color.red;
+
+                if (m_bSimulationUnlock) return; // Prevent bug that add node cost even if its already unlocked
+                WorldScript.Instance.UnlockedPath_Simulation.Add(this);
             }
             else
             {
-				WorldScript.Instance.UnlockedPath_Simulation.Remove(this);
 				if(bUnlocked)
 				{
 					m_SpriteRenderer.color = EdgeScript.gold;
@@ -71,9 +69,12 @@ public abstract class NodeBase : MonoBehaviour
 				else
 				{
 					m_SpriteRenderer.color = EdgeScript.lightBlue;
-				}
+                }
+
+                if (!m_bSimulationUnlock) return; // Prevent bug that remove node cost even if its already locked
+                WorldScript.Instance.UnlockedPath_Simulation.Remove(this);
             }
-			m_bSimulationUnlock = value;
+            m_bSimulationUnlock = value;
         }
     }
 
@@ -88,7 +89,14 @@ public abstract class NodeBase : MonoBehaviour
         {
             if (value)
             {
-                m_SpriteRenderer.color = EdgeScript.gold;
+                if (bSimulationUnlock)
+                {
+                    m_SpriteRenderer.color = Color.red;
+                }
+                else
+                {
+                    m_SpriteRenderer.color = EdgeScript.gold;
+                }
             }
             else
             {
@@ -150,59 +158,36 @@ public abstract class NodeBase : MonoBehaviour
         m_Origin 			= node.m_Origin;
         transform.parent 	= WorldScript.Instance.transform;
         transform.position 	= new Vector3(node.m_X, 0, node.m_Z);
+
+        if (m_Origin)
+            m_SpriteRenderer.color = EdgeScript.gold;
 	}
 
-    public void UnlockSimulationNode()
+    public void TryUnlockSimulationNode()
     {
-        if (bSimulationUnlock || bUnlocked)
-            return;
-        if (CanUnlockSimulation())
-        {
-            bSimulationUnlock = true;
-        }
+        if (bSimulationUnlock || bUnlocked) return;
+        if (CanUnlock()) bSimulationUnlock = true;
     }
 
-    public void LockSimulationNode()
+    public void TryLockSimulationNode()
     {
-        if (bUnlocked || m_Origin || !bSimulationUnlock)
-            return;
-        if (CanLockSimulation())
-        {
-            bSimulationUnlock = false;
-        }
+        if (bUnlocked || !bSimulationUnlock)  return;
+        if (CanLockSimulation()) bSimulationUnlock = false;
     }
 
-    public void UnlockNode()
+    public void TryUnlockNode()
     {
-        if (bUnlocked)
-            return;
-        if (CanUnlock())
-        {
-            bUnlocked = true;
-        }
+        if (bUnlocked) return;
+        if (CanUnlock()) bUnlocked = true;
     }
 
-    public void LockNode()
+    public void TryLockNode()
     {
-        if (!bUnlocked || m_Origin)
-            return;
-        if (CanLock())
-        {
-            bUnlocked = false;
-        }
+        if (!bUnlocked || m_Origin) return;
+        if (CanLock()) bUnlocked = false;
     }
 
     public bool CanUnlock()
-    {
-        for (int i = 0; i < m_neighbors.Count; i++)
-        {
-            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked)
-                return true;
-        }
-        return false;
-    }
-
-    public bool CanUnlockSimulation()
     {
         for (int i = 0; i < m_neighbors.Count; i++)
         {
@@ -224,7 +209,7 @@ public abstract class NodeBase : MonoBehaviour
 
     public bool CanLockSimulation()
     {
-        if (CanReachOrigin(true))
+        if (CanReachOrigin())
         {
             return true;
         }
@@ -233,96 +218,97 @@ public abstract class NodeBase : MonoBehaviour
     }
 
     // Need ALL unlocked neighbors to be connected
-    public bool CanReachOrigin(bool simulation = false)
+    public bool CanReachOrigin()
     {
         if (m_Origin)
             return true;
 
-        if(simulation) {
+        bool tmpS = bSimulationUnlock;
+        bool tmpU = bUnlocked;
+
+        if (tmpS)
+        {
             bSimulationUnlock = false;
-        }else{
+        }
+        else
+        {
             bUnlocked = false;
         }
+
         for (int i = 0; i < m_neighbors.Count; i++)
 		{
-            if(simulation)
+            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked || m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
             {
-                if (m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
+                if (!m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc())
                 {
-                    if (!m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc(simulation))
-                    {          
-                        bSimulationUnlock = true;
-                        return false;
+                    if (tmpS)
+                    {
+                        bSimulationUnlock = tmpS;
                     }
+                    else
+                    {
+                        bUnlocked = tmpU;
+                    }
+                    return false;
                 }
             }
-            else
-            {
-                if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked)
-                {
-                    if (!m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc(simulation))
-                    {          
-                        bUnlocked = true;
-                        return false;
-                    }
-                }
-            }
-        }        
-        if(simulation) {
-            bSimulationUnlock = true;
-        }else{
-            bUnlocked = true;
+        }
+        if (tmpS)
+        {
+            bSimulationUnlock = tmpS;
+        }
+        else
+        {
+            bUnlocked = tmpU;
         }
         return true;
     }
     
     // Only need ONE neighbor to be connected because any other that won't, will be connected to this one who has one connected.
-    public bool CanReachOriginRecc(bool simulation = false)
+    public bool CanReachOriginRecc()
     {
         if (m_Origin)
             return true;
-        
-        if(simulation) {
+
+        bool tmpS = bSimulationUnlock;
+        bool tmpU = bUnlocked;
+
+        if (tmpS)
+        {
             bSimulationUnlock = false;
-        }else{
+        }
+        else
+        {
             bUnlocked = false;
         }
 
         for (int i = 0; i < m_neighbors.Count; i++)
 		{
-            if(simulation)
+            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked || m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
             {
-                if(m_neighbors[i].GetComponent<NodeBase>().bUnlocked)
+                if (m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc())
                 {
-                    bSimulationUnlock = true;
+                    if (tmpS)
+                    {
+                        bSimulationUnlock = tmpS;
+                    }
+                    else
+                    {
+                        bUnlocked = tmpU;
+                    }
                     return true;
                 }
-                if (m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
-                {
-                    if (m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc(simulation))
-                    {              
-                        bSimulationUnlock = true;
-                        return true;
-                    }
-                }
             }
-            else
-            {
-                if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked)
-                {
-                    if (m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc(simulation))
-                    {              
-                        bUnlocked = true;
-                        return true;
-                    }
-                }
-            }
-        }        
-        if(simulation) {
-            bSimulationUnlock = true;
-        }else{
-            bUnlocked = true;
         }
+        if (tmpS)
+        {
+            bSimulationUnlock = tmpS;
+        }
+        else
+        {
+            bUnlocked = tmpU;
+        }
+
         return false;
     }
 
@@ -332,7 +318,7 @@ public abstract class NodeBase : MonoBehaviour
         path.Add(this);
 		NodeBase curr = this;
 		NodeBase bestNeigh = curr;
-		while (!curr.bUnlocked) 
+		while (!curr.bUnlocked && !curr.bSimulationUnlock) 
         {
             // Node is unreachable because of ignore pink node
             if(curr.m_weight == int.MaxValue)
@@ -347,7 +333,8 @@ public abstract class NodeBase : MonoBehaviour
 			}
 			path.Add(bestNeigh);
 			curr = bestNeigh;
-		}
+        }
+        path.Remove(curr); // Since its already unlocked
 		WorldScript.Instance.HighlightPath = path;
     }
 
@@ -370,7 +357,7 @@ public abstract class NodeBase : MonoBehaviour
         path.Add(this);
         NodeBase curr = this;
         NodeBase bestNeigh = curr;
-        while (!curr.bUnlocked)
+        while (!curr.bUnlocked && !curr.bSimulationUnlock)
         {
             // Node is unreachable because of ignore pink node
             if (curr.m_weightCost == int.MaxValue)
@@ -385,6 +372,7 @@ public abstract class NodeBase : MonoBehaviour
             path.Add(bestNeigh);
             curr = bestNeigh;
         }
+        path.Remove(curr); // Since its already unlocked
         return path;
     }
 
@@ -411,20 +399,19 @@ public abstract class NodeBase : MonoBehaviour
         {
             if (SimulationScript.Instance.SimulationMode)
             {
-                if (bUnlocked)
+                if (bUnlocked) // To not let the user lock gold nodes in simulation
                     return;
-                if (bSimulationUnlock) LockSimulationNode();
-                else UnlockSimulationNode();
+                if (bSimulationUnlock) TryLockSimulationNode();
+                else TryUnlockSimulationNode();
 
-                PathCostPanel.Instance.SetPanel(WorldScript.Instance.UnlockedPath_Simulation);
+                UiManager.Instance.CostInfoPanel_Simulated.SetPanel(WorldScript.Instance.UnlockedPath_Simulation);
             }
             else
             {
-                if (bUnlocked) LockNode();
-                else UnlockNode();
-
-                WorldScript.Instance.CalculateNodesWeight();
+                if (bUnlocked) TryLockNode();
+                else TryUnlockNode();
             }
+            WorldScript.Instance.CalculateNodesWeight();
         }
     }
 

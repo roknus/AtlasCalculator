@@ -15,20 +15,7 @@ public class PathCostPanel : MonoBehaviour {
 
     public Text Greatness;
 
-	public static PathCostPanel Instance { get; private set; }
-
-	void Awake () 
-    {		
-		if (Instance != null) 
-		{
-			Destroy (gameObject);
-			return;
-		}
-		else
-		{
-			Instance = this;
-		}
-	}
+    public PathStatsPanel StatPanel;
 
     public void SetPanel(NodePath path)
     {
@@ -42,7 +29,7 @@ public class PathCostPanel : MonoBehaviour {
 		Purple.text 	= path.PurpleSparks.ToString ();
         Greatness.text  = path.Greatness.ToString();
 
-        PathStatsPanel.Instance.SetPanel(path);
+        StatPanel.SetPanel(path);
     }
 
     public void Clean()
@@ -55,6 +42,6 @@ public class PathCostPanel : MonoBehaviour {
         Proficency.text = "0";
         Greatness.text = "0";
 
-        PathStatsPanel.Instance.Clean();
+        StatPanel.Clean();
     }
 }

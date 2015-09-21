@@ -57,7 +57,7 @@ public class NodeCostList : MonoBehaviour {
         foreach (int i in WorldScript.Instance.m_nodes.Keys)
         {
             NodeBase nodebase = WorldScript.Instance.m_nodes[i].GetComponent<NodeBase>();
-            if (nodebase && !nodebase.bUnlocked && nodebase is NodeWithOneStat)
+            if (nodebase && !nodebase.bUnlocked && !nodebase.bSimulationUnlock && nodebase is NodeWithOneStat)
             {
                 NodeWithOneStat node = nodebase as NodeWithOneStat;
                 if (node.m_Stat1 == Stat1.Greatness)
