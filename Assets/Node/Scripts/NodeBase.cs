@@ -5,6 +5,9 @@ using System.Collections.Generic;
 [ExecuteInEditMode] 
 public abstract class NodeBase : MonoBehaviour
 {
+    public delegate void dUpdateColor();
+    public dUpdateColor UpdateColor;
+
 	public int 				m_Id;
 	public List<Transform>  m_neighbors;
 	public List<NodeBase>  	m_neighborsInfo;
@@ -38,6 +41,7 @@ public abstract class NodeBase : MonoBehaviour
 				m_SpriteRenderer.color = EdgeScript.lightBlue;
 			}
 			m_highLight = value;
+            UpdateColor();
 		}
 	}
     private bool            m_bSimulationUnlock;
@@ -75,6 +79,7 @@ public abstract class NodeBase : MonoBehaviour
                 WorldScript.Instance.UnlockedPath_Simulation.Remove(this);
             }
             m_bSimulationUnlock = value;
+            UpdateColor();
         }
     }
 
@@ -103,6 +108,7 @@ public abstract class NodeBase : MonoBehaviour
                 m_SpriteRenderer.color = EdgeScript.lightBlue;
             }
             m_bUnlocked = value;
+            UpdateColor();
         }
     }
 

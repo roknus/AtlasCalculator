@@ -30,7 +30,7 @@ public class WorldScript : MonoBehaviour
     public Transform ValorNode;
     
 	public Transform        edge;
-	public Dictionary<int, Transform>  m_nodes;
+    public Dictionary<int, Transform> m_nodes { get; set; }
 
     public  NodePath        m_UnlockedPath;
     private NodePath        m_UnlockedPath_Simulation;
@@ -192,7 +192,7 @@ public class WorldScript : MonoBehaviour
 		}
 	}
 
-	public void ResetNodeWeight()
+	private void ResetNodeWeight()
 	{		
 		// Init the base path too
 		m_UnlockedPath = new NodePath();
@@ -217,13 +217,8 @@ public class WorldScript : MonoBehaviour
     /*
      * Simulated, 1 = Calculated
      */
-    public void ResetPath(bool simulation = false)
+    public void ResetPath()
     {
-        if (simulation)
-        {
-            SimulationScript.Instance.SwitchSimulation();
-            SimulationScript.Instance.SwitchSimulation();
-        }
         HighlightPath = null;
     }
 
@@ -257,10 +252,10 @@ public class WorldScript : MonoBehaviour
 					neigh.m_weight = 1;
 					CalculateWeightRecc(neigh);
 				}
-				int cost = neigh.GetCost().Tot;
+                int cost = neigh.GetCost().Tot + 1; // Little fix untill ive entered all nodes (was to fix the bug with nodes with 0 cost)
 				if(neigh.m_weightCost > n.m_weightCost + cost)
 				{
-					neigh.m_weightCost = cost;
+                    neigh.m_weightCost = cost;
 					CalculateWeightCostRecc(neigh);
 				}
 			}
@@ -290,7 +285,7 @@ public class WorldScript : MonoBehaviour
                     int cost = neigh.GetCost().Tot;
                     if (neigh.m_weightCost > n.m_weightCost + cost)
                     {
-                        neigh.m_weightCost = cost;
+                        neigh.m_weightCost = cost; 
                         CalculateWeightCostRecc(neigh);
                     }
                 }
@@ -335,7 +330,7 @@ public class WorldScript : MonoBehaviour
                 }
             }
 
-			int cost = neigh.GetCost().Tot;
+            int cost = neigh.GetCost().Tot + 1; // Little fix untill ive entered all nodes (was to fix the bug with nodes with 0 cost)
 			if(neigh.m_weightCost > n.m_weightCost + cost)
 			{
 				neigh.m_weightCost = n.m_weightCost + cost;
@@ -355,7 +350,7 @@ public class WorldScript : MonoBehaviour
 				es.Node1 = n;
 				es.Node2 = neigh;
 			}
-		}		
+		}
 	}
 	
 	public void CleanHighlight()

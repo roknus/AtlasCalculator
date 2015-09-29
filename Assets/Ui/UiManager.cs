@@ -88,7 +88,7 @@ public class UiManager : MonoBehaviour
         GreatnessNodeList.gameObject.SetActive(false);
 
         MoreInfosButton.onClick.AddListener(() => SwitchMoreInfos());
-        ResetPathInfo_Simulated.onClick.AddListener(() => WorldScript.Instance.ResetPath(true));
+        ResetPathInfo_Simulated.onClick.AddListener(() => SimulationScript.Instance.ResetPath());
         ResetPathInfo_Calculated.onClick.AddListener(() => WorldScript.Instance.ResetPath());
 
         ShowSymbolsButton.onClick.AddListener(() => SwitchShowSymbols());

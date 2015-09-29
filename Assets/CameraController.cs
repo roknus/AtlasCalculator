@@ -49,7 +49,8 @@ public class CameraController : MonoBehaviour
 			float v = YSpeed * -Input.GetAxis("Mouse Y");
 
             // ZDistance factor make the camera feels the same speed whatever the distance
-            transform.Translate(new Vector3(h, 0, v) * XSpeed * ZDistance, Space.World);
+            //transform.Translate(new Vector3(h, 0, v) * XSpeed * ZDistance, Space.World);
+            transform.position = transform.position + (new Vector3(h, 0, v) * XSpeed * ZDistance);
             // Limit movement on X and Z axis
             ClampCameraPos();
 		}
@@ -57,7 +58,10 @@ public class CameraController : MonoBehaviour
         if(w != 0)
         {
             ZDistance += -w * 100;
-            StartCoroutine("SmoothZoom");
+            if (!bSmoothZoomCoroutine)
+            {
+                StartCoroutine("SmoothZoom");
+            }
         }
 	}
 

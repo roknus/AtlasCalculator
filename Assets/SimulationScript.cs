@@ -159,22 +159,34 @@ public class SimulationScript : MonoBehaviour
     public void SwitchSimulation()
     {
         SetSimulation(!SimulationMode);
+
+        WorldScript.Instance.CalculateNodesWeight();
+    }
+
+    public void ResetPath()
+    {
         WorldScript.Instance.ResetPath();
+
+        WorldScript.Instance.UnlockedPath_Simulation = new NodePath(true);
+
+        //UiManager.Instance.CostInfoPanel_Simulated.Clean();
+        foreach (Transform n in WorldScript.Instance.m_nodes.Values)
+        {
+            n.GetComponent<NodeBase>().bSimulationUnlock = false;
+        }
     }
 
     public void SetSimulation(bool _b)
     {
+        // If it's already in simulation then reset it
+        if (_b && SimulationMode) SetSimulation(false);
+
         SimulationMode = _b;
 
-        // Fix Bug : Need it even for disable because bSimulationUnlock = false remove the node from the simulation saved by the user
-        WorldScript.Instance.UnlockedPath_Simulation = new NodePath(true);
+        ResetPath();
+
         if (!SimulationMode)
         {
-            UiManager.Instance.CostInfoPanel_Simulated.Clean();
-            foreach (Transform n in WorldScript.Instance.m_nodes.Values)
-            {
-                n.GetComponent<NodeBase>().bSimulationUnlock = false;
-            }
             UiManager.Instance.SaveSimulationButton.interactable = false;
             UiManager.Instance.SimulationButton.GetComponentInChildren<Text>().text = "Simulation (OFF)";
             UiManager.Instance.CostInfoPanel_Simulated.transform.parent.parent.gameObject.SetActive(false);

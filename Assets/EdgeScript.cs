@@ -6,6 +6,9 @@ public class EdgeScript : MonoBehaviour {
 	public Transform Node1;
 	public Transform Node2;
 
+    private NodeBase m_Node1;
+    private NodeBase m_Node2;
+
     private Color m_Color1;
     private Color m_Color2;
 
@@ -24,9 +27,17 @@ public class EdgeScript : MonoBehaviour {
 			m_lineRenderer.SetPosition (0, Node1.position + dir * 0.5f);
 			m_lineRenderer.SetPosition (1, Node2.position - dir * 0.5f);
 		}
+
+        m_Node1 = Node1.GetComponent<NodeBase>();
+        m_Node2 = Node2.GetComponent<NodeBase>();
+
+        m_Node1.UpdateColor += UpdateColor;
+        m_Node2.UpdateColor += UpdateColor;
+
+        UpdateColor();
 	}
 	
-	void Update () 
+	public void UpdateColor () 
     {
 		if(Node1 == null || Node2 == null)
 		{
