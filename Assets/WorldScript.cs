@@ -66,12 +66,16 @@ public class WorldScript : MonoBehaviour
 			if(value != null)
 			{
 				m_hightLightPath = value;
-                UiManager.Instance.CostInfoPanel_Calculated.gameObject.SetActive(true);
-                UiManager.Instance.CostInfoPanel_Calculated.SetPanel(m_hightLightPath);
+				UiManager.Instance.CostInfoPanel_Calculated.transform.parent.parent.gameObject.SetActive(true);
+				UiManager.Instance.CostInfoPanel_Calculated.SetPanel(m_hightLightPath);
 	            foreach (NodeBase n in m_hightLightPath.Path)
 	            {
 					n.HighLight = true;
 				}
+			}
+			else
+			{
+				UiManager.Instance.CostInfoPanel_Calculated.transform.parent.parent.gameObject.SetActive(false);			
 			}
 		}
 	}
@@ -99,9 +103,9 @@ public class WorldScript : MonoBehaviour
 		} else if (!EDITOR_MODE && Application.isPlaying) {
 			StartCoroutine("LoadAtlasXML");			
 		}
-		else {
+		else
+        {
 			InitNodes();
-			InitEdges();
 		}
 	}
 
@@ -109,11 +113,16 @@ public class WorldScript : MonoBehaviour
 	{
 		if(!Application.isPlaying)
 			return;
+        
+        SymbolNode.Init();
 
         UiManager.Instance.ShowCalculatorUI();
         UiManager.Instance.InitCalculatorUI();
 
-        CTalentNode.Init();
+        if (!EDITOR_MODE)
+        {
+            UiManager.Instance.ShowLoading();
+        }
 
         CalculateNodesWeight();
 	}
@@ -214,13 +223,32 @@ public class WorldScript : MonoBehaviour
 		}
 	}	
 
-    /*
-     * Simulated, 1 = Calculated
-     */
     public void ResetPath()
     {
         HighlightPath = null;
     }
+
+	public void StrikeCalculatedpath()
+	{
+		StrikePath (HighlightPath);
+		ResetPath ();
+	}
+
+	public void StrikePath(NodePath _path)
+	{
+		if (_path == null)
+			return;
+
+		bool unlockedOne;
+		do {
+			unlockedOne = false;
+			foreach (NodeBase n in _path.Path) {
+				bool ret = n.TryUnlockNode ();
+				if(!unlockedOne)
+					unlockedOne = ret;
+			}
+		} while(unlockedOne);
+	}
 
     public void SwitchIgnorePinkNodes(bool _b)
     {
@@ -341,15 +369,23 @@ public class WorldScript : MonoBehaviour
 
 	public void InitEdges()
 	{		
-		foreach (Transform n in m_nodes.Values) {
+		foreach (Transform n in m_nodes.Values) 
+        {
 			NodeBase ns = n.GetComponent<NodeBase>();
-			foreach(Transform neigh in ns.m_neighbors)
-			{
-				Transform e = Instantiate<Transform>(edge);
-				EdgeScript es = e.GetComponent<EdgeScript>();
-				es.Node1 = n;
-				es.Node2 = neigh;
-			}
+
+            foreach (Transform neigh in ns.m_neighbors)
+            {
+                NodeBase ns2 = neigh.GetComponent<NodeBase>();
+                if (!ns2.m_edgeInit)
+                {
+                    Transform e = Instantiate<Transform>(edge);
+                    EdgeScript es = e.GetComponent<EdgeScript>();
+                    es.Node1 = n;
+                    es.Node2 = neigh;
+                }
+            }
+
+            ns.m_edgeInit = true;
 		}
 	}
 	

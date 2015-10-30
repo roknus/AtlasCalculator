@@ -19,7 +19,7 @@ namespace Serializer
 
         }
 
-        public XMLTalentNode(CTalentNode node)
+        public XMLTalentNode(SymbolNode node)
             : base(node)
         {
             m_TalentName = node.m_TalentName;

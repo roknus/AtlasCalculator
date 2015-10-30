@@ -7,13 +7,13 @@ public class UiManager : MonoBehaviour
 {
     public RectTransform    MainMenu;
     public RectTransform    Calculateur;
-    public Image            ForeGroundPanel;
 
+    public Image            ForeGroundPanel;
     public RectTransform    ProficencyWindow;
+    public AlertMessage     AlertMessage;
+    public RectTransform    LoadingPanel;
 
     public RectTransform    GreatnessNodeList;
-
-    public AlertMessage     AlertMessage;
 
     public Button           ButtonGreatness;
 
@@ -28,10 +28,12 @@ public class UiManager : MonoBehaviour
 
     public PathCostPanel    CostInfoPanel_Simulated;
     public PathStatsPanel   StatsInfoPanel_Simulated;
-    public Button           ResetPathInfo_Simulated;
+	public Button           ResetPathInfo_Simulated;
+	public Button			StrikePath_Simulated;
     public PathCostPanel    CostInfoPanel_Calculated;
     public PathStatsPanel   StatsInfoPanel_Calculated;
-    public Button           ResetPathInfo_Calculated;
+	public Button           ResetPathInfo_Calculated;
+	public Button			StrikePath_Calculated;
     public Button           MoreInfosButton;
 
     public RectTransform    SymbolsPanel;
@@ -44,6 +46,9 @@ public class UiManager : MonoBehaviour
     public Button           LoadSimulationButton;
 
     public Button           SaveButton;
+
+    public Button           TopViewButton;
+    public Button           IsoViewButton;
 
     public RectTransform    FPSCounter;
 
@@ -91,13 +96,19 @@ public class UiManager : MonoBehaviour
         ResetPathInfo_Simulated.onClick.AddListener(() => SimulationScript.Instance.ResetPath());
         ResetPathInfo_Calculated.onClick.AddListener(() => WorldScript.Instance.ResetPath());
 
+		StrikePath_Calculated.onClick.AddListener ( () =>  WorldScript.Instance.StrikeCalculatedpath());
+		StrikePath_Simulated.onClick.AddListener ( () => SimulationScript.Instance.StrikeSimulatedPath());
+
         ShowSymbolsButton.onClick.AddListener(() => SwitchShowSymbols());
 
         ShowSimulationButton.onClick.AddListener(() => SwitchSimulation());
 
-        SimulationButton.onClick.AddListener(() => { SimulationScript.Instance.SwitchSimulation(); });
+        SimulationButton.onClick.AddListener(() => SimulationScript.Instance.SwitchSimulation());
 
         IgnorePinkNodes.onValueChanged.AddListener((b) => WorldScript.Instance.SwitchIgnorePinkNodes(b));
+
+        IsoViewButton.onClick.AddListener(() => CameraController.Instance.SwitchCamera());
+        TopViewButton.onClick.AddListener(() => CameraController.Instance.SwitchCamera());
     }
 
     public void EnableForeGround()  { ForeGroundPanel.enabled = true; }
@@ -112,6 +123,19 @@ public class UiManager : MonoBehaviour
     {
         EnableForeGround();
         ProficencyWindow.gameObject.SetActive(true);
+    }
+
+    public void ShowAlertMessage(string message)
+    {
+        EnableForeGround();
+        AlertMessage.gameObject.SetActive(true);
+        AlertMessage.Message.text = message;
+    }
+
+    public void ShowLoading()
+    {
+        EnableForeGround();
+        LoadingPanel.gameObject.SetActive(true);
     }
 
     public void EnableGreatnessNodeList()
@@ -145,13 +169,6 @@ public class UiManager : MonoBehaviour
     public void SwitchSimulation()
     {
         SimulationPanel.gameObject.SetActive(!SimulationPanel.gameObject.activeSelf);
-    }
-
-    public void ShowAlertMessage(string message)
-    {
-        EnableForeGround();
-        AlertMessage.gameObject.SetActive(true);
-        AlertMessage.Message.text = message;
     }
 
     public void ShowRightClickPanel(Vector3 _pos, NodeBase _n)

@@ -21,7 +21,7 @@ public class XMLNode
 	
 	[XmlArray("neighbor")]
 	[XmlArrayItem("int")]
-	public List<int> neighbor = new List<int>();
+    public List<int> neighbor = new List<int>();
 
 	public XMLNode()
 	{
@@ -35,8 +35,11 @@ public class XMLNode
 		m_Z         = node.transform.position.z;
         m_Origin    = node.m_Origin;
 
-		foreach(Transform n in node.m_neighbors)
-			neighbor.Add(n.GetComponent<NodeBase>().m_Id);
+        foreach (int i in node.m_neighborsIds)
+        {
+            if (!neighbor.Contains(i))
+                neighbor.Add(i);
+        }
 	}
 }
 

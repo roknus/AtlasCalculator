@@ -40,17 +40,39 @@ public class NodeToolTipScript : MonoBehaviour
 	{
 		gameObject.SetActive(false);	
 	}
+
     public void SetAtMousePosition()
-    {
-        transform.position = Input.mousePosition + mouseOffset;
+	{
+		RectTransform t = transform as RectTransform;
+
+		// Replace the node tooltip in case it get out of view
+		if ((t.sizeDelta.x + Input.mousePosition.x > Screen.width) || (t.sizeDelta.y + Input.mousePosition.y > Screen.height))
+		{
+			Vector3 newPosition= new Vector3();
+			if(t.sizeDelta.x + Input.mousePosition.x > Screen.width)
+				newPosition.x = Screen.width - t.sizeDelta.x + mouseOffset.x;
+			else
+				newPosition.x = Input.mousePosition.x;
+
+			if(t.sizeDelta.y + Input.mousePosition.y > Screen.height)
+				newPosition.y = Screen.height - t.sizeDelta.y + mouseOffset.y;
+			else
+				newPosition.y = Input.mousePosition.y;
+
+			transform.position = newPosition;
+		}
+		else
+		{
+			transform.position = Input.mousePosition + mouseOffset;
+		}
     }
 
     public void SetValues(NodeBase _node)
 	{
-        if(_node is CTalentNode)
+        if (_node is SymbolNode)
         {
             NodeIcon.gameObject.SetActive(true);
-            NodeIcon.sprite = CTalentNode.SymbolIcon[((CTalentNode)_node).Talent];
+            NodeIcon.sprite = SymbolNode.SymbolIcon[((SymbolNode)_node).Talent];
         }
         else
         {

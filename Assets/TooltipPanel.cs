@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class TooltipPanel : MonoBehaviour 
 {
     public Text text;
 
     private static Vector3 mouseOffset = new Vector2(5, 5);
+	private static Vector3 defaultPosition = new Vector3(-50,-50);
 
     public static TooltipPanel Instance { get; private set; }
 
@@ -32,6 +34,11 @@ public class TooltipPanel : MonoBehaviour
 	
 	void Update () 
     {
+		if (!EventSystem.current.IsPointerOverGameObject()) {
+			Disable ();
+			return;
+		}
+
         RectTransform t = transform as RectTransform;
         if (t.sizeDelta.x + Input.mousePosition.x > Screen.width)
         {
@@ -50,6 +57,7 @@ public class TooltipPanel : MonoBehaviour
 
     public void Disable()
     {
-        transform.position = new Vector3(-50,-50);
-    }
+		transform.position = defaultPosition;
+		gameObject.SetActive(false);
+	}
 }

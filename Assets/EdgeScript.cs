@@ -12,24 +12,35 @@ public class EdgeScript : MonoBehaviour {
     private Color m_Color1;
     private Color m_Color2;
 
-	public static Color gold = new Color(0.77f, 0.7f, 0.34f);
-    public static Color lightBlue = new Color(0.2f, 0.2f, 0.7f);
+    public Color unlocked;
+    public Color locked;
+    public Color calculated;
 
-	private LineRenderer m_lineRenderer;
+	//private LineRenderer m_lineRenderer;
+	private SpriteRenderer m_SpriteRenderer;
 
-	void Start () 
-	{
-		m_lineRenderer = GetComponent<LineRenderer> ();
+	void Start ()
+    {
+        m_Node1 = Node1.GetComponent<NodeBase>();
+        m_Node2 = Node2.GetComponent<NodeBase>();
+
+		//m_lineRenderer = GetComponent<LineRenderer> ();
+		m_SpriteRenderer = GetComponent<SpriteRenderer> ();
 
         Vector3 dir = Node2.position - Node1.position;
         dir.Normalize();
-		if (m_lineRenderer && Node1 && Node2) {
-			m_lineRenderer.SetPosition (0, Node1.position + dir * 0.5f);
-			m_lineRenderer.SetPosition (1, Node2.position - dir * 0.5f);
-		}
+		if (m_SpriteRenderer && Node1 && Node2) 
+		{
+			transform.position = ((Node1.position + (dir * m_Node1.transform.localScale.x / 2.2f)) + (Node2.position - (dir * m_Node2.transform.localScale.x / 2.2f))) / 2;
+			transform.LookAt(Node2.position);
+			transform.Rotate(new Vector3(90,0,0));
+			transform.localScale = new Vector3(0.5f, Vector3.Distance(Node1.position + (dir * m_Node1.transform.localScale.x / 2.2f) , Node2.position - (dir * m_Node2.transform.localScale.x / 2.2f)) * 1.55f, 0.5f);
 
-        m_Node1 = Node1.GetComponent<NodeBase>();
-        m_Node2 = Node2.GetComponent<NodeBase>();
+		
+            //Trick to make edge longer or shorter depending on the node size
+			//m_lineRenderer.SetPosition (0, Node1.position + dir * m_Node1.transform.localScale.x / 2.2f);
+			//m_lineRenderer.SetPosition(1, Node2.position - dir * m_Node2.transform.localScale.x / 2.2f);
+		}    
 
         m_Node1.UpdateColor += UpdateColor;
         m_Node2.UpdateColor += UpdateColor;
@@ -45,10 +56,7 @@ public class EdgeScript : MonoBehaviour {
 			return;
 		}
 
-		m_Color1 = lightBlue;
-		m_Color2 = lightBlue;
-
-        m_lineRenderer.SetWidth(0.3f, 0.3f);
+		m_SpriteRenderer.color = locked;
 
 		if ((Node1.GetComponent<NodeBase>().HighLight && Node2.GetComponent<NodeBase>().HighLight) ||
 		    (Node1.GetComponent<NodeBase>().bUnlocked && Node2.GetComponent<NodeBase>().HighLight) ||
@@ -56,27 +64,19 @@ public class EdgeScript : MonoBehaviour {
             (Node1.GetComponent<NodeBase>().bSimulationUnlock && Node2.GetComponent<NodeBase>().HighLight) ||
             (Node1.GetComponent<NodeBase>().HighLight && Node2.GetComponent<NodeBase>().bSimulationUnlock))
         {
-            m_Color1 = Color.green;
-            m_Color2 = Color.green;
-            m_lineRenderer.SetWidth(0.6f, 0.6f);
+			m_SpriteRenderer.color = calculated;
         }
 
         if (Node1.GetComponent<NodeBase>().bUnlocked && Node2.GetComponent<NodeBase>().bUnlocked)
         {
-            m_Color1 = gold;
-            m_Color2 = gold;
-            m_lineRenderer.SetWidth(0.6f, 0.6f);
+			m_SpriteRenderer.color = unlocked;
         }
 
         if ((Node1.GetComponent<NodeBase>().bSimulationUnlock && Node2.GetComponent<NodeBase>().bSimulationUnlock) ||
             (Node1.GetComponent<NodeBase>().bUnlocked && Node2.GetComponent<NodeBase>().bSimulationUnlock) ||
             (Node1.GetComponent<NodeBase>().bSimulationUnlock && Node2.GetComponent<NodeBase>().bUnlocked))
         {
-            m_Color1 = Color.red;
-            m_Color2 = Color.red;
-            m_lineRenderer.SetWidth(0.6f, 0.6f);
-        }
-
-        m_lineRenderer.SetColors(m_Color1, m_Color2);		
+			m_SpriteRenderer.color = Color.red;
+        }	
 	}
 }

@@ -35,10 +35,31 @@ public class User : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
 
+        if (Username)
+        {
+            Username.text = "";
+            Password.text = "";
+        }
+
         bUserGraphLoaded = false;
         bTryingToConnect = false;
         Connected = false;
     }
+
+	IEnumerator Start()
+	{		
+		bTryingToConnect = true;
+		WWW www = new WWW("http://" + ServerHostname + "/atlas/isConnected.php");
+		
+		yield return www;
+		
+		bTryingToConnect = false;
+		
+		if (www.text == "true") {
+			Connected = true;
+			LoadAtlas ();
+		}
+	}
 
     IEnumerator TryConnect()
     {
@@ -71,11 +92,12 @@ public class User : MonoBehaviour
 
     public IEnumerator Reconnect()
     {
-        if (Username == null || Password == null)
+		if (Username.text == "" || Password.text == "")
         {
             UiManager.Instance.ShowAlertMessage("Error, need to reconnect");
-            Debug.Log("Error, need to reconnect");
-            yield break;
+			Debug.Log("Error, need to reconnect");
+			Connected = false;
+			yield break;
         }
 
         if (!bTryingToConnect)
@@ -107,20 +129,18 @@ public class User : MonoBehaviour
                     yield return www2;
 
                     bTryingToConnect = false;
-                    /*
-                    if (www2.text == "success")
-                    {
-                        UiManager.Instance.ShowAlertMessage("reconnected");
-                    }
-                    else
-                    {
-                        UiManager.Instance.ShowAlertMessage("error");
-                    }*/
+
+					if(www2.text == "fail")
+					{
+						UiManager.Instance.ShowAlertMessage("Error, need to reconnect");
+						Debug.Log("Error, need to reconnect");
+						Connected = false;
+					}
                 }
             }
         }
-    }
-
+	}
+	
     public void StartLoadUserXML()
     { 
         StartCoroutine("LoadUserXML", "http://" + ServerHostname + "/atlas/AtlasCalculator/get_user_graph.php");
@@ -137,9 +157,12 @@ public class User : MonoBehaviour
 
         yield return www;
 
+        UiManager.Instance.DisableForeGround();
+
         // check for errors
         if (www.error != null)
         {
+            UiManager.Instance.ShowAlertMessage("An error occured");
             Debug.Log("WWW error : " + www.error);
         }
         else
@@ -153,6 +176,7 @@ public class User : MonoBehaviour
             }
             else
             {
+                UiManager.Instance.ShowAlertMessage("Failed to load user graph");
                 Debug.Log("Failed to load user graph");
             }
         }

@@ -1,22 +1,38 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.EventSystems;
 
-public class CameraController : MonoBehaviour 
+public delegate void CameraBehavior();
+
+public class CameraController : MonoBehaviour
 {
-    private const int MIN_CAMERA_DIST   = 10;
-    private const int MAX_CAMERA_DIST   = 70;
+    public GameObject TopCamera;
+    public GameObject IsoCamera;
+    private bool isTopView = false;
 
-    private const int MIN_X_CAMERA = -300;
-    private const int MAX_X_CAMERA = 400;
+    private CameraBehavior CameraUpdate;
 
-    private const int MIN_Z_CAMERA = -190;
-    private const int MAX_Z_CAMERA = 130;
+    private const float MIN_CAMERA_DIST   = 0.0f;
+    private const float MAX_CAMERA_DIST   = 6.0f;
+
+	private const float MIN_X_CAMERA = -300;
+	private const float MAX_X_CAMERA = 400;
+
+	private const float MIN_Z_CAMERA = -190;
+	private const float MAX_Z_CAMERA = 130;
 
 	public float    XSpeed;
 	public float    YSpeed;
+    //public float    m_MoveSpeed;
+    public float 	MoveSpeed
+    {
+		get { return m_ZDistance * 0.4f + 0.5f; }
+		//set { m_MoveSpeed = Mathf.Clamp(value, 0.5f, 2.9f); }
+    }
 
-    public float      zoomSpeed;
-    private float   m_ZDistance;
+    public float    zoomSpeed;
+    public float   	m_ZDistance;
     public float    ZDistance
     {
         get { return m_ZDistance; }
@@ -36,12 +52,17 @@ public class CameraController : MonoBehaviour
 		
 		Instance = this;
 
-        m_ZDistance = 30;
+        ZDistance = 3.0f;
+        //MoveSpeed = 1.7f;
         bSmoothZoomCoroutine = false;
+        CameraUpdate = IsoCameraUpdate;
+		transform.position = new Vector3(15, 0, -10);
 	}
 
-	void Update () 
-	{
+	void Update () { CameraUpdate(); }
+
+    private void IsoCameraUpdate()
+    {
         // Left click or middle click but not hover UI
 		if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject() && (Input.GetMouseButton (0) || Input.GetMouseButton(2))) 
 		{
@@ -50,20 +71,92 @@ public class CameraController : MonoBehaviour
 
             // ZDistance factor make the camera feels the same speed whatever the distance
             //transform.Translate(new Vector3(h, 0, v) * XSpeed * ZDistance, Space.World);
-            transform.position = transform.position + (new Vector3(h, 0, v) * XSpeed * ZDistance);
+            transform.position = transform.position + (new Vector3(h, 0, v) * MoveSpeed);
             // Limit movement on X and Z axis
             ClampCameraPos();
 		}
         float w = Input.GetAxis("Mouse ScrollWheel");
         if(w != 0)
         {
-            ZDistance += -w * 100;
+            float delta = ZDistance;
+            ZDistance += -w;
+            //MoveSpeed += -w * 0.4f;
+            delta -= ZDistance;
+
+            TopCamera.GetComponent<Camera>().orthographicSize -= delta * 4.0f;
+
+            Vector3 translation = new Vector3(0, 0, delta);
+			IsoCamera.transform.Translate(translation * zoomSpeed, Space.Self);
+
+            /* Removed for v0.60
             if (!bSmoothZoomCoroutine)
             {
                 StartCoroutine("SmoothZoom");
             }
+             * */
         }
 	}
+
+    private void TopCameraUpdate()
+    {
+        // Left click or middle click but not hover UI
+        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject() && (Input.GetMouseButton(0) || Input.GetMouseButton(2)))
+        {
+            float h = XSpeed * -Input.GetAxis("Mouse X");
+            float v = YSpeed * -Input.GetAxis("Mouse Y");
+
+            // ZDistance factor make the camera feels the same speed whatever the distance
+            //transform.Translate(new Vector3(h, 0, v) * XSpeed * ZDistance, Space.World);
+            transform.position = transform.position + (new Vector3(h, 0, v) * MoveSpeed);
+            // Limit movement on X and Z axis
+            ClampCameraPos();
+        }
+        float w = Input.GetAxis("Mouse ScrollWheel");
+        if (w != 0)
+        {
+            float delta = ZDistance;
+            ZDistance += -w;
+            //MoveSpeed += -w * 0.4f;
+            delta -= ZDistance;
+
+			TopCamera.GetComponent<Camera>().orthographicSize -= delta * 4.0f;
+			
+			Vector3 translation = new Vector3(0, 0, delta);
+			IsoCamera.transform.Translate(translation * zoomSpeed, Space.Self);
+            
+                /*
+            Vector3 translation = new Vector3(0, 0, delta);
+            transform.Translate(translation * zoomSpeed, Space.Self);
+
+            /* Removed for v0.60
+            if (!bSmoothZoomCoroutine)
+            {
+                StartCoroutine("SmoothZoom");
+            }
+             * */
+        }
+    }
+
+    public void SwitchCamera()
+    {
+        if(isTopView)
+        {
+            TopCamera.SetActive(false);
+            IsoCamera.SetActive(true);
+            UiManager.Instance.TopViewButton.interactable = true;
+            UiManager.Instance.IsoViewButton.interactable = false;
+            CameraUpdate = IsoCameraUpdate;
+        }
+        else
+        {
+            TopCamera.SetActive(true);
+            IsoCamera.SetActive(false);
+            UiManager.Instance.TopViewButton.interactable = false;
+            UiManager.Instance.IsoViewButton.interactable = true;
+            CameraUpdate = TopCameraUpdate;
+        }
+        isTopView = !isTopView;
+    }
 
     private void ClampCameraPos()
     {
@@ -98,11 +191,6 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    public void SwitchFullScreen()
-    {
-        Screen.fullScreen = !Screen.fullScreen;
-    }
-
     IEnumerator SmoothFocus(Vector3 _dest)
     {
         if(!bSmoothFocusCoroutine)
@@ -123,8 +211,8 @@ public class CameraController : MonoBehaviour
 	public void FocusNode(Transform node)
 	{
         //Vector3 temp = transform.position;
-        transform.position = new Vector3(node.position.x, 0, node.position.z);
-        transform.Translate(new Vector3(0, 0, -ZDistance), Space.Self);
+        transform.position = node.position;
+        //transform.Translate(new Vector3(0, 0, -ZDistance), Space.Self);
         /*Vector3 dest = transform.position;
         transform.position = temp;
         StartCoroutine(SmoothFocus(dest));*/

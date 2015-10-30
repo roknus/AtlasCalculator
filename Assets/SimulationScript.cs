@@ -72,7 +72,7 @@ public class SimulationScript : MonoBehaviour
 
             yield return www;
 
-            if (www.error != null)
+            if (www.text == "error")
             {
                 UiManager.Instance.ShowAlertMessage("An error occured");
             }
@@ -175,6 +175,12 @@ public class SimulationScript : MonoBehaviour
             n.GetComponent<NodeBase>().bSimulationUnlock = false;
         }
     }
+
+	public void StrikeSimulatedPath()
+	{
+		WorldScript.Instance.StrikePath (WorldScript.Instance.UnlockedPath_Simulation);
+		ResetPath ();
+	}
 
     public void SetSimulation(bool _b)
     {

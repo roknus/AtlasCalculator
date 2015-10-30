@@ -1,19 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
-public class Tooltip : MonoBehaviour 
+public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public string m_Tooltip;
 
-    public void ShowTooltip()
+    public void OnPointerEnter(PointerEventData eventData)
     {
         TooltipPanel.Instance.gameObject.SetActive(true);
         TooltipPanel.Instance.Enable(m_Tooltip);
     }
 
-    public void HideTooltip()
+    public void OnPointerExit(PointerEventData eventData)
     {
         TooltipPanel.Instance.Disable();
-        TooltipPanel.Instance.gameObject.SetActive(false);
     }
 }

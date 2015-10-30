@@ -20,6 +20,7 @@ public class SymbolSubListScript : MonoBehaviour
         {
             Instance = this;
         }
+        gameObject.SetActive(false);
 	}
 
     public void ResetList()
@@ -30,15 +31,17 @@ public class SymbolSubListScript : MonoBehaviour
         }
     }
 
-    public void SetList(List<CTalentNode> _list)
+    public void SetList(List<SymbolNode> _list)
     {
         ResetList();
-        foreach (CTalentNode t in _list)
+		for(int i = 0; i < _list.Count; i++)
         {
+			SymbolNode t = _list[i];
             Transform o = Instantiate(shortcut);
             o.SetParent(transform);
-            o.GetComponentInChildren<Tooltip>().m_Tooltip = CTalentNode.SymbolName[t.Talent];
-            o.GetComponentsInChildren<Image>()[1].sprite = CTalentNode.SymbolIcon[t.Talent];
+            o.GetComponentInChildren<Tooltip>().m_Tooltip = SymbolNode.SymbolName[t.Talent];
+			o.GetComponentsInChildren<Image>()[1].sprite = SymbolNode.SymbolIcon[t.Talent];
+            o.GetComponentInChildren<Text>().text = SymbolNode.RomanNumbers[i];
             Transform tCopy = t.transform;
             o.GetComponent<Button>().onClick.AddListener(() => CameraController.Instance.FocusNode(tCopy));            
         }

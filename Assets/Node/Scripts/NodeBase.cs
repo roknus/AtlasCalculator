@@ -1,20 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
-[ExecuteInEditMode] 
-public abstract class NodeBase : MonoBehaviour
+[ExecuteInEditMode]
+public abstract class NodeBase : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public delegate void dUpdateColor();
     public dUpdateColor UpdateColor;
 
-	public int 				m_Id;
-	public List<Transform>  m_neighbors;
-	public List<NodeBase>  	m_neighborsInfo;
-    public List<int>        m_neighborsIds;
-	public int 				m_weight;
-	public int				m_weightCost;
-    public bool             m_Origin;
+    public Sprite Locked;
+    public Sprite Unlocked;
+    public Sprite Simulated;
+    public Sprite Calculated;
+
+	public int 				    m_Id;
+    public List<Transform> m_neighbors;
+    public List<NodeBase>    m_neighborsInfo;
+    public List<int> m_neighborsIds;
+	public int 				    m_weight;
+	public int				    m_weightCost;
+    public bool                 m_Origin;
+    public bool m_edgeInit { get; set; }
     private bool            m_highLight;
 	public bool 			HighLight
 	{
@@ -26,19 +33,19 @@ public abstract class NodeBase : MonoBehaviour
 		{			
 			if(bUnlocked)
 			{
-				m_SpriteRenderer.color = EdgeScript.gold;
+                m_SpriteRenderer.sprite = Unlocked;
             }
             else if (bSimulationUnlock)
             {
-                m_SpriteRenderer.color = Color.red;
+                m_SpriteRenderer.sprite = Simulated;
             }
 			else if(value)
-			{
-				m_SpriteRenderer.color = Color.green;
+            {
+                m_SpriteRenderer.sprite = Calculated;
 			}
 			else
-			{
-				m_SpriteRenderer.color = EdgeScript.lightBlue;
+            {
+                m_SpriteRenderer.sprite = Locked;
 			}
 			m_highLight = value;
             UpdateColor();
@@ -55,7 +62,7 @@ public abstract class NodeBase : MonoBehaviour
         {
             if (value)
             {
-                m_SpriteRenderer.color = Color.red;
+                m_SpriteRenderer.sprite = Simulated;
 
                 if (m_bSimulationUnlock) return; // Prevent bug that add node cost even if its already unlocked
                 WorldScript.Instance.UnlockedPath_Simulation.Add(this);
@@ -63,16 +70,16 @@ public abstract class NodeBase : MonoBehaviour
             else
             {
 				if(bUnlocked)
-				{
-					m_SpriteRenderer.color = EdgeScript.gold;
+                {
+                    m_SpriteRenderer.sprite = Unlocked;
 				}
 				else if(HighLight)
-				{
-					m_SpriteRenderer.color = Color.green;				
+                {
+                    m_SpriteRenderer.sprite = Calculated;			
 				}
 				else
-				{
-					m_SpriteRenderer.color = EdgeScript.lightBlue;
+                {
+                    m_SpriteRenderer.sprite = Locked;
                 }
 
                 if (!m_bSimulationUnlock) return; // Prevent bug that remove node cost even if its already locked
@@ -96,16 +103,16 @@ public abstract class NodeBase : MonoBehaviour
             {
                 if (bSimulationUnlock)
                 {
-                    m_SpriteRenderer.color = Color.red;
+                    m_SpriteRenderer.sprite = Simulated;
                 }
                 else
                 {
-                    m_SpriteRenderer.color = EdgeScript.gold;
+                    m_SpriteRenderer.sprite = Unlocked;
                 }
             }
             else
             {
-                m_SpriteRenderer.color = EdgeScript.lightBlue;
+                m_SpriteRenderer.sprite = Locked;
             }
             m_bUnlocked = value;
             UpdateColor();
@@ -116,9 +123,8 @@ public abstract class NodeBase : MonoBehaviour
 
     void Awake()
 	{
+        m_edgeInit = false;
         transform.SetParent(WorldScript.Instance.transform);
-
-		m_SpriteRenderer.color = EdgeScript.lightBlue;
 	}
 
     public void InitNode()
@@ -126,21 +132,16 @@ public abstract class NodeBase : MonoBehaviour
 		// Create this node neighbors lists
         foreach(int i in m_neighborsIds)
         {
-			m_neighbors.Add(WorldScript.Instance.m_nodes[i]);
-			m_neighborsInfo.Add(WorldScript.Instance.m_nodes[i].GetComponent<NodeBase>());
-        }
-		// Add this node to its neighbors in case it wasn't there
-        for (int i = 0; i < m_neighbors.Count; i++)
-        {
-            NodeBase n = m_neighbors[i].GetComponent<NodeBase>();
-            if (n != null)
+            Transform neigh = WorldScript.Instance.m_nodes[i];
+            NodeBase n = neigh.GetComponent<NodeBase>();
+            m_neighbors.Add(neigh);
+            m_neighborsInfo.Add(n);
+
+            if(!n.m_neighborsIds.Contains(m_Id))
             {
-                if (!n.m_neighborsIds.Contains(m_Id))
-                {
-                    n.m_neighbors.Add(transform);
-                    n.m_neighborsInfo.Add(this);
-                    n.m_neighborsIds.Add(m_Id);
-                }
+                n.m_neighbors.Add(transform);
+                n.m_neighborsInfo.Add(this);
+                n.m_neighborsIds.Add(m_Id);
             }
         }
     }
@@ -160,13 +161,14 @@ public abstract class NodeBase : MonoBehaviour
 	public virtual void Deserialize(XMLNode node)
 	{
 		m_Id                = node.m_Id;
-        m_neighborsIds      = node.neighbor;
+        foreach (int i in node.neighbor)
+            m_neighborsIds.Add(i);
         m_Origin 			= node.m_Origin;
         transform.parent 	= WorldScript.Instance.transform;
         transform.position 	= new Vector3(node.m_X, 0, node.m_Z);
 
         if (m_Origin)
-            m_SpriteRenderer.color = EdgeScript.gold;
+            m_SpriteRenderer.sprite = Unlocked;
 	}
 
     public void TryUnlockSimulationNode()
@@ -181,10 +183,14 @@ public abstract class NodeBase : MonoBehaviour
         if (CanLockSimulation()) bSimulationUnlock = false;
     }
 
-    public void TryUnlockNode()
+    public bool TryUnlockNode()
     {
-        if (bUnlocked) return;
-        if (CanUnlock()) bUnlocked = true;
+        if (bUnlocked) return false;
+        if (CanUnlock ()) {
+			bUnlocked = true;
+			return true;
+		}
+		return false;
     }
 
     public void TryLockNode()
@@ -195,9 +201,9 @@ public abstract class NodeBase : MonoBehaviour
 
     public bool CanUnlock()
     {
-        for (int i = 0; i < m_neighbors.Count; i++)
+        foreach (NodeBase n in m_neighborsInfo)
         {
-            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked || m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
+            if (n.bUnlocked || n.bSimulationUnlock)
                 return true;
         }
         return false;
@@ -241,11 +247,11 @@ public abstract class NodeBase : MonoBehaviour
             bUnlocked = false;
         }
 
-        for (int i = 0; i < m_neighbors.Count; i++)
+        foreach (NodeBase n in m_neighborsInfo)
 		{
-            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked || m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
+            if (n.bUnlocked || n.bSimulationUnlock)
             {
-                if (!m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc())
+                if (!n.CanReachOriginRecc())
                 {
                     if (tmpS)
                     {
@@ -288,11 +294,11 @@ public abstract class NodeBase : MonoBehaviour
             bUnlocked = false;
         }
 
-        for (int i = 0; i < m_neighbors.Count; i++)
+        foreach (NodeBase n in m_neighborsInfo)
 		{
-            if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked || m_neighbors[i].GetComponent<NodeBase>().bSimulationUnlock)
+            if (n.bUnlocked || n.bSimulationUnlock)
             {
-                if (m_neighbors[i].GetComponent<NodeBase>().CanReachOriginRecc())
+                if (n.CanReachOriginRecc())
                 {
                     if (tmpS)
                     {
@@ -384,24 +390,42 @@ public abstract class NodeBase : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        for (int i = 0; i < m_neighbors.Count; i++)
+        foreach (NodeBase n in m_neighborsInfo)
         {
-            if (m_neighbors[i] != null)
-            {
-                if (m_neighbors[i].GetComponent<NodeBase>().bUnlocked && bUnlocked)
-                    Gizmos.color = Color.red;
-                else
-                    Gizmos.color = Color.blue;
+            if (n.bUnlocked && bUnlocked)
+                Gizmos.color = Color.red;
+            else
+                Gizmos.color = Color.blue;
 
-                Gizmos.DrawLine(transform.position, m_neighbors[i].position);
-            }
+            Gizmos.DrawLine(transform.position, n.transform.position);
         }
     }
 
-    void OnMouseDown()
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        // Do not hover UI
-        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        if (!(Input.GetMouseButton(0) || Input.GetMouseButton(2)))
+        {
+            NodeToolTipScript.Instance.gameObject.SetActive(true);
+            NodeToolTipScript.Instance.SetValues(this);
+            NodeToolTipScript.Instance.SetAtMousePosition();
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (!(Input.GetMouseButton(0) || Input.GetMouseButton(2)))
+        {
+            NodeToolTipScript.Instance.gameObject.SetActive(false);
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if(eventData.button == PointerEventData.InputButton.Right)
+        {
+            UiManager.Instance.ShowRightClickPanel(Input.mousePosition, this);
+        }
+        else if(eventData.button == PointerEventData.InputButton.Left)
         {
             if (SimulationScript.Instance.SimulationMode)
             {
@@ -419,30 +443,6 @@ public abstract class NodeBase : MonoBehaviour
             }
             WorldScript.Instance.CalculateNodesWeight();
         }
-    }
-
-    void OnMouseEnter()
-    {
-        // Do not hover UI
-        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-        {
-            NodeToolTipScript.Instance.gameObject.SetActive(true);
-            NodeToolTipScript.Instance.SetValues(this);
-        }
-    }
-
-    void OnMouseOver()
-    {
-        // Do not hover UI
-        if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-        {
-            NodeToolTipScript.Instance.SetAtMousePosition();
-        }
-    }
-
-    void OnMouseExit()
-    {
-        NodeToolTipScript.Instance.gameObject.SetActive(false);
     }
 }
 

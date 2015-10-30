@@ -14,7 +14,7 @@ public class XMLEtherNode : XMLNode
 
     }
 
-    public XMLEtherNode(EtherNode node)
+    public XMLEtherNode(VectorNode node)
         : base(node)
 	{
         m_EtherType = node.m_EtherType;
