@@ -7,6 +7,8 @@ public class User : MonoBehaviour
 {
     public static string ServerHostname = "www.prestige-guilde.xyz";
 
+    public bool isTopView;
+
     public InputField Username;
     public InputField Password;
 
@@ -41,6 +43,7 @@ public class User : MonoBehaviour
             Password.text = "";
         }
 
+        isTopView = false;
         bUserGraphLoaded = false;
         bTryingToConnect = false;
         Connected = false;
@@ -143,7 +146,7 @@ public class User : MonoBehaviour
 	
     public void StartLoadUserXML()
     { 
-        StartCoroutine("LoadUserXML", "http://" + ServerHostname + "/atlas/AtlasCalculator/get_user_graph.php");
+        StartCoroutine("LoadUserXML", "http://" + ServerHostname + "/atlas/AtlasCalculator/get_user_graph2.php");
     }
 
     public void StartLoadDefaultUserXML()
@@ -153,7 +156,11 @@ public class User : MonoBehaviour
 
     IEnumerator LoadUserXML(string url)
     {
-        WWW www = new WWW(url);
+        WWWForm form = new WWWForm();
+        if(Username)
+            form.AddField("username", Username.text);
+
+        WWW www = new WWW(url, form);
 
         yield return www;
 
@@ -205,6 +212,11 @@ public class User : MonoBehaviour
         }
 
         Application.LoadLevel("AtlasCalculator");
+    }
+
+    public void LoadDivineAtlas()
+    {
+        Application.LoadLevel("DivineAtlas");
     }
 
     public void CreateNewAccount()

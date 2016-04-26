@@ -52,6 +52,9 @@ public class UiManager : MonoBehaviour
 
     public RectTransform    FPSCounter;
 
+    // TopUnderPanel buttons
+    public Button           FirstButton;
+
     public static UiManager Instance { get; private set; }
 
 	void Start () 
@@ -76,15 +79,37 @@ public class UiManager : MonoBehaviour
         }
     }
 
+    private void ResetAllListener()
+    {
+        SaveButton.onClick.RemoveAllListeners();
+        ButtonProficency.onClick.RemoveAllListeners();
+        ButtonGreatness.onClick.RemoveAllListeners();
+        MoreInfosButton.onClick.RemoveAllListeners();
+        ResetPathInfo_Simulated.onClick.RemoveAllListeners();
+        ResetPathInfo_Calculated.onClick.RemoveAllListeners();
+        StrikePath_Calculated.onClick.RemoveAllListeners();
+        StrikePath_Simulated.onClick.RemoveAllListeners();
+        ShowSymbolsButton.onClick.RemoveAllListeners();
+        ShowSimulationButton.onClick.RemoveAllListeners();
+        SimulationButton.onClick.RemoveAllListeners();
+        IgnorePinkNodes.onValueChanged.RemoveAllListeners();
+        IsoViewButton.onClick.RemoveAllListeners();
+        TopViewButton.onClick.RemoveAllListeners();
+        FirstButton.onClick.RemoveAllListeners();
+    }
+
     public void InitCalculatorUI()
     {
+        // When we switch atlas need to reset everything
+        ResetAllListener();
+
         SaveButton.onClick.AddListener(() => Save());
         if (!WorldScript.Instance.EDITOR_MODE && (User.Instance == null || !User.Instance.Connected))
         {
             SaveButton.gameObject.SetActive(false);
             UiManager.Instance.SaveSimulationButton.gameObject.SetActive(false);
             UiManager.Instance.LoadSimulationButton.gameObject.SetActive(false);
-        }                                           
+        }
 
         ButtonProficency.onClick.AddListener(() => { OpenProficencyWindow(); });
         ButtonProficencyText = ButtonProficency.GetComponentInChildren<Text>();
@@ -96,8 +121,8 @@ public class UiManager : MonoBehaviour
         ResetPathInfo_Simulated.onClick.AddListener(() => SimulationScript.Instance.ResetPath());
         ResetPathInfo_Calculated.onClick.AddListener(() => WorldScript.Instance.ResetPath());
 
-		StrikePath_Calculated.onClick.AddListener ( () =>  WorldScript.Instance.StrikeCalculatedpath());
-		StrikePath_Simulated.onClick.AddListener ( () => SimulationScript.Instance.StrikeSimulatedPath());
+        StrikePath_Calculated.onClick.AddListener(() => WorldScript.Instance.StrikeCalculatedpath());
+        StrikePath_Simulated.onClick.AddListener(() => SimulationScript.Instance.StrikeSimulatedPath());
 
         ShowSymbolsButton.onClick.AddListener(() => SwitchShowSymbols());
 
@@ -109,6 +134,17 @@ public class UiManager : MonoBehaviour
 
         IsoViewButton.onClick.AddListener(() => CameraController.Instance.SwitchCamera());
         TopViewButton.onClick.AddListener(() => CameraController.Instance.SwitchCamera());
+
+        // TopUnder panel
+        switch (Application.loadedLevel)
+        {
+            case 1: // Ascencion 
+                FirstButton.onClick.AddListener(() => User.Instance.LoadDivineAtlas());
+                break;
+            case 2: // Divine
+                FirstButton.onClick.AddListener(() => User.Instance.LoadAtlas());
+                break;
+        }
     }
 
     public void EnableForeGround()  { ForeGroundPanel.enabled = true; }

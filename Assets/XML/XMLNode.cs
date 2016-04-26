@@ -7,6 +7,7 @@ using UnityEngine;
 
 [XmlInclude(typeof(XMLNodeWithCost))]
 [XmlInclude(typeof(XMLEtherNode))]
+[XmlInclude(typeof(XMLEmptyNode))]
 public class XMLNode
 {
 	[XmlAttribute("id")]
@@ -35,10 +36,11 @@ public class XMLNode
 		m_Z         = node.transform.position.z;
         m_Origin    = node.m_Origin;
 
-        foreach (int i in node.m_neighborsIds)
+        foreach (Transform n in node.m_neighbors)
         {
-            if (!neighbor.Contains(i))
-                neighbor.Add(i);
+            int nId = n.GetComponent<NodeBase>().m_Id;
+            if (!neighbor.Contains(nId))
+                neighbor.Add(nId);
         }
 	}
 }

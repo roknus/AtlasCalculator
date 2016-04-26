@@ -9,14 +9,23 @@ using System.IO;
 
 using Serializer;
 
+public enum AtlasType
+{
+    AscensionAtlas,
+    DivineAtlas,
+}
+
 [ExecuteInEditMode] 
 public class WorldScript : MonoBehaviour
 {
+    public AtlasType m_AtlasType;
+
 	public bool EDITOR_MODE;
 	public bool ATLAS_INITIALIZED;
 
     public Transform ClassNode;
     public Transform EtherNode;
+    public Transform EmptyNode;
     public Transform GodForm;
 
     public Transform GreatnessNode;
@@ -127,9 +136,27 @@ public class WorldScript : MonoBehaviour
         CalculateNodesWeight();
 	}
 
-	IEnumerator LoadAtlasXML()
+    private string GetAtlasFileName()
+    {
+        switch(m_AtlasType)
+        {
+            case AtlasType.AscensionAtlas:
+                return "atlas.xml";
+            case AtlasType.DivineAtlas:
+                return "divineAtlas.xml";
+            default:
+                return "";
+        }
+    }
+
+    IEnumerator LoadAtlasXML()
 	{
-        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/atlas.xml");	
+        string atlasFile = GetAtlasFileName();
+
+        if (atlasFile == "")
+            yield break;
+
+        WWW ret = new WWW("http://" + User.ServerHostname + "/atlas/AtlasCalculator/" + atlasFile);	
 		
 		yield return ret;
 		
@@ -248,7 +275,9 @@ public class WorldScript : MonoBehaviour
 					unlockedOne = ret;
 			}
 		} while(unlockedOne);
-	}
+
+        CalculateNodesWeight();
+    }
 
     public void SwitchIgnorePinkNodes(bool _b)
     {
@@ -411,7 +440,7 @@ public class WorldScript : MonoBehaviour
 	{
 		var serializer = new XmlSerializer(typeof(NodeSerializer));
 		NodeSerializer nodeSerializer = new NodeSerializer();
-		using(var stream = new FileStream("C:/atlas.xml", FileMode.Create))
+		using(var stream = new FileStream("C:/"+GetAtlasFileName(), FileMode.Create))
 		{
 			foreach(Transform t in m_nodes.Values)
 			{
@@ -491,7 +520,11 @@ public class WorldScript : MonoBehaviour
 			else if (n is XMLEtherNode)
 			{
 				t = Instantiate(EtherNode) as Transform;
-			}
+            }
+            else if (n is XMLEmptyNode)
+            {
+                t = Instantiate(EmptyNode) as Transform;
+            }
 
             if (t != null)
             {

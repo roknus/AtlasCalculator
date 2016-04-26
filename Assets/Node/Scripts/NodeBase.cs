@@ -390,14 +390,14 @@ public abstract class NodeBase : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     void OnDrawGizmos()
     {
-        foreach (NodeBase n in m_neighborsInfo)
+        foreach (Transform n in m_neighbors)
         {
-            if (n.bUnlocked && bUnlocked)
+            if (n.GetComponent<NodeBase>().bUnlocked && bUnlocked)
                 Gizmos.color = Color.red;
             else
                 Gizmos.color = Color.blue;
 
-            Gizmos.DrawLine(transform.position, n.transform.position);
+            Gizmos.DrawLine(transform.position, n.position);
         }
     }
 

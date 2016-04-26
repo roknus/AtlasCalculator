@@ -11,7 +11,6 @@ public enum EtherType
 public class VectorNode : NodeBase 
 {
     public EtherType m_EtherType;
-    private static string NodeIconPath = "NodesIcon/Vector";
 
 	public override string GetName() { return m_EtherType.ToString() + " Ether Slot"; }
 	
@@ -25,25 +24,27 @@ public class VectorNode : NodeBase
 
 		m_EtherType = (EtherType)etherNode.m_EtherType;
 
-        switch(m_EtherType)
+        Sprite[] sprites = Resources.LoadAll<Sprite>("NodesIcon/NodeIcons");
+
+        switch (m_EtherType)
         {
             case EtherType.Sun:
-                Locked = Resources.Load<Sprite>(NodeIconPath + "/VectorBlue" + "/Vector_Blue_Locked");
-                Unlocked = Resources.Load<Sprite>(NodeIconPath + "/VectorBlue" + "/Vector_Blue_Unlocked");
-                Simulated = Resources.Load<Sprite>(NodeIconPath + "/VectorBlue" + "/Vector_Blue_Simulated");
-                Calculated = Resources.Load<Sprite>(NodeIconPath + "/VectorBlue" + "/Vector_Blue_Calculated");           
+                Locked      = sprites[50];
+                Unlocked    = sprites[70];
+                Simulated   = sprites[60];
+                Calculated  = sprites[40];
                 break;
             case EtherType.Het:
-                Locked = Resources.Load<Sprite>(NodeIconPath + "/VectorGreen" + "/Vector_Green_Locked");
-                Unlocked = Resources.Load<Sprite>(NodeIconPath + "/VectorGreen" + "/Vector_Green_Unlocked");
-                Simulated = Resources.Load<Sprite>(NodeIconPath + "/VectorGreen" + "/Vector_Green_Simulated");
-                Calculated = Resources.Load<Sprite>(NodeIconPath + "/VectorGreen" + "/Vector_Green_Calculated");
+                Locked      = sprites[51];
+                Unlocked    = sprites[71];
+                Simulated   = sprites[61];
+                Calculated  = sprites[41];
                 break;
             case EtherType.Coph:
-                Locked = Resources.Load<Sprite>(NodeIconPath + "/VectorRed" + "/Vector_Red_Locked");
-                Unlocked = Resources.Load<Sprite>(NodeIconPath + "/VectorRed" + "/Vector_Red_Unlocked");
-                Simulated = Resources.Load<Sprite>(NodeIconPath + "/VectorRed" + "/Vector_Red_Simulated");
-                Calculated = Resources.Load<Sprite>(NodeIconPath + "/VectorRed" + "/Vector_Red_Calculated");
+                Locked      = sprites[52];
+                Unlocked    = sprites[72];
+                Simulated   = sprites[62];
+                Calculated  = sprites[42];             
                 break;
         }
 

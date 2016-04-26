@@ -43,12 +43,13 @@ public class BuildGraphEditorOnly : MonoBehaviour {
 			//Debug.Log("Left-Mouse Down");
 		}
 		if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-		{			
+		{
 			RaycastHit hit;
 			Vector3 mousePose = new Vector3(Event.current.mousePosition.x, Screen.height - Event.current.mousePosition.y, 0);
 			Ray ray = Camera.main.ScreenPointToRay (mousePose);
-			if (Physics.Raycast (ray, out hit, 1 << 8)) {			
-				if (currentlySelected == null)
+			if (Physics.Raycast (ray, out hit, 1 << 8))
+            {
+                if (currentlySelected == null)
 					currentlySelected = hit.transform;
 				else {
                     NodeBase nodeScript = hit.transform.GetComponent<NodeBase>();

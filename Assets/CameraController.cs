@@ -9,7 +9,6 @@ public class CameraController : MonoBehaviour
 {
     public GameObject TopCamera;
     public GameObject IsoCamera;
-    private bool isTopView = false;
 
     private CameraBehavior CameraUpdate;
 
@@ -59,6 +58,12 @@ public class CameraController : MonoBehaviour
 		transform.position = new Vector3(15, 0, -10);
 	}
 
+    void Start()
+    {
+        // Ugly but... set the camera to top view (useful when switching scene and want to keep same view)
+        if (User.Instance.isTopView) SetTopView();
+    }
+
 	void Update () { CameraUpdate(); }
 
     private void IsoCameraUpdate()
@@ -99,7 +104,7 @@ public class CameraController : MonoBehaviour
 
     private void TopCameraUpdate()
     {
-        // Left click or middle click but not hover UI
+        // Left click or middle click but do not hover UI
         if (!UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject() && (Input.GetMouseButton(0) || Input.GetMouseButton(2)))
         {
             float h = XSpeed * -Input.GetAxis("Mouse X");
@@ -137,25 +142,35 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    public void SetTopView()
+    {
+        TopCamera.SetActive(true);
+        IsoCamera.SetActive(false);
+        UiManager.Instance.TopViewButton.interactable = false;
+        UiManager.Instance.IsoViewButton.interactable = true;
+        CameraUpdate = TopCameraUpdate;
+    }
+
+    public void SetIsoView()
+    {
+        TopCamera.SetActive(false);
+        IsoCamera.SetActive(true);
+        UiManager.Instance.TopViewButton.interactable = true;
+        UiManager.Instance.IsoViewButton.interactable = false;
+        CameraUpdate = IsoCameraUpdate;
+    }
+
     public void SwitchCamera()
     {
-        if(isTopView)
+        if (User.Instance.isTopView)
         {
-            TopCamera.SetActive(false);
-            IsoCamera.SetActive(true);
-            UiManager.Instance.TopViewButton.interactable = true;
-            UiManager.Instance.IsoViewButton.interactable = false;
-            CameraUpdate = IsoCameraUpdate;
+            SetIsoView();
         }
         else
         {
-            TopCamera.SetActive(true);
-            IsoCamera.SetActive(false);
-            UiManager.Instance.TopViewButton.interactable = false;
-            UiManager.Instance.IsoViewButton.interactable = true;
-            CameraUpdate = TopCameraUpdate;
+            SetTopView();
         }
-        isTopView = !isTopView;
+        User.Instance.isTopView = !User.Instance.isTopView;
     }
 
     private void ClampCameraPos()
